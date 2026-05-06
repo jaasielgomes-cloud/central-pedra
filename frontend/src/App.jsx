@@ -72,10 +72,11 @@ export default function App() {
 
   const campaigns    = data?.campaigns?.campaigns || []
   const approvals    = data?.approvals?.items     || []
-  const deals        = data?.realtime?.pipedrive?.deals?.data       || []
-  const activities   = data?.realtime?.pipedrive?.activities?.data  || []
-  const pipelines    = data?.realtime?.pipedrive?.pipelines?.data   || []
-  const persons      = data?.realtime?.pipedrive?.persons?.data     || []
+  const deals          = data?.realtime?.pipedrive?.deals?.data       || []
+  const activities     = data?.realtime?.pipedrive?.activities?.data  || []
+  const pipelines      = data?.realtime?.pipedrive?.pipelines?.data   || []
+  const persons        = data?.realtime?.pipedrive?.persons?.data     || []
+  const pipeCampaigns  = data?.realtime?.pipedrive?.campaigns?.data   || []
   const improvements = data?.improvements?.improvements || []
   const messages     = data?.messages?.messages   || []
   const benchmarks   = data?.benchmarks?.benchmarks || {}
@@ -476,6 +477,59 @@ export default function App() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {pipeCampaigns.length > 0 ? (
+          <div className="card section-block">
+            <h2>Campanhas Pipedrive ({pipeCampaigns.length})</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Assunto</th>
+                  <th>Status</th>
+                  <th>Enviados</th>
+                  <th>Abertos</th>
+                  <th>Clicados</th>
+                  <th>Descadastros</th>
+                  <th>Envio</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pipeCampaigns.map((c, i) => {
+                  const taxaAbertura = c.sent > 0 ? Math.round((c.opened / c.sent) * 100) : 0
+                  const taxaClique   = c.sent > 0 ? Math.round((c.clicked / c.sent) * 100) : 0
+                  return (
+                    <tr key={c.id || i}>
+                      <td><strong>{c.name}</strong></td>
+                      <td className="text-secondary">{c.subject || '—'}</td>
+                      <td><StatusBadge status={c.status} /></td>
+                      <td>{c.sent || 0}</td>
+                      <td>
+                        {c.opened || 0}
+                        {c.sent > 0 && <span className="pct-tag">{taxaAbertura}%</span>}
+                      </td>
+                      <td>
+                        {c.clicked || 0}
+                        {c.sent > 0 && <span className="pct-tag">{taxaClique}%</span>}
+                      </td>
+                      <td>{c.unsubscribed || 0}</td>
+                      <td className="text-secondary">
+                        {c.send_time ? new Date(c.send_time).toLocaleDateString('pt-BR') : '—'}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="card section-block">
+            <h2>Campanhas Pipedrive</h2>
+            <p className="empty-msg">
+              Nenhuma campanha encontrada. O módulo de Campanhas do Pipedrive requer o add-on "Campaigns" ativo na conta.
+            </p>
           </div>
         )}
       </>

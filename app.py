@@ -205,6 +205,42 @@ def fetch_pipedrive_persons() -> list:
         print(f"[Pipedrive Persons] Erro: {e}")
         return []
 
+def fetch_pipedrive_campaigns() -> list:
+    cached = _cache_get("pipedrive_campaigns")
+    if cached:
+        return cached
+    try:
+        resp = http.get(
+            f"{PIPEDRIVE_BASE}/campaigns",
+            params={"api_token": PIPEDRIVE_KEY, "limit": 100},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data = resp.json().get("data") or []
+        result = [
+            {
+                "id":           c.get("id"),
+                "name":         c.get("name", "Campanha sem nome"),
+                "status":       c.get("status", ""),
+                "type":         c.get("type", ""),
+                "send_time":    c.get("send_time", ""),
+                "created_at":   c.get("created", ""),
+                "subject":      c.get("subject", ""),
+                "from_name":    c.get("from_name", ""),
+                "from_email":   c.get("from_email", ""),
+                "opened":       c.get("opened_count", 0),
+                "clicked":      c.get("clicked_count", 0),
+                "sent":         c.get("mail_count", 0),
+                "unsubscribed": c.get("unsubscribed_count", 0),
+            }
+            for c in data
+        ]
+        _cache_set("pipedrive_campaigns", result)
+        return result
+    except Exception as e:
+        print(f"[Pipedrive Campaigns] Erro: {e}")
+        return []
+
 # ── Dados mock (substitua por integrações reais depois) ───────────
 
 MOCK_DATA = {
@@ -352,6 +388,7 @@ def dashboard_full():
                 "activities": {"success": True, "data": activities},
                 "pipelines":  {"success": True, "data": fetch_pipedrive_pipelines()},
                 "persons":    {"success": True, "data": fetch_pipedrive_persons()},
+                "campaigns":  {"success": True, "data": fetch_pipedrive_campaigns()},
             },
         },
         "improvements": {
