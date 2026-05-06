@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Grupo Pedra</title>
+  <style>
+    :root {
+      --black: #0b0b0d;
+      --dark: #18181b;
+      --gray: #3f3f46;
+      --soft: #f4f4f5;
+      --white: #ffffff;
+      --red: #c1121f;
+      --red2: #ef233c;
+      --green: #16a34a;
+      --yellow: #ca8a04;
+      --blue: #2563eb;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--soft);
+      color: var(--black);
+    }
+
+    header {
+      background: linear-gradient(135deg, #050505, #202024);
+      color: white;
+      padding: 26px 32px;
+      border-bottom: 5px solid var(--red);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      color: #d4d4d8;
+    }
+
+    main {
+      max-width: 1500px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      border: 0;
+      background: var(--red);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .btn:hover {
+      background: var(--red2);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: white;
+      padding: 11px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .tab-btn.active {
+      background: var(--black);
+      color: white;
+      border-color: var(--red);
+      box-shadow: 0 8px 18px rgba(193, 18, 31, 0.22);
+    }
+
+    .tab {
+      display: none;
+    }
+
+    .tab.active {
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .card, .panel {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 10px 24px rgba(15, 15, 16, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    .clickable {
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .clickable:hover {
+      transform: translateY(-2px);
+      border-color: var(--red);
+      box-shadow: 0 12px 28px rgba(193, 18, 31, 0.16);
+    }
+
+    .card.dark {
+      background: var(--black);
+      color: white;
+      border-bottom: 5px solid var(--red);
+    }
+
+    .card h3 {
+      margin: 0;
+      color: #71717a;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .card.dark h3 {
+      color: #d4d4d8;
+    }
+
+    .number {
+      font-size: 34px;
+      font-weight: 900;
+      margin-top: 8px;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .muted {
+      color: #71717a;
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .running, .ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .paused {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .draft {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .pending {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .archived {
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .table-wrap {
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #fafafa;
+      color: #52525b;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    tr.clickable-row {
+      cursor: pointer;
+    }
+
+    tr.clickable-row:hover {
+      background: #fff1f2;
+    }
+
+    .bar-row {
+      margin-bottom: 16px;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .bar-bg {
+      height: 14px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--red), var(--black));
+      border-radius: 999px;
+      min-width: 4px;
+    }
+
+    .bar-fill.green {
+      background: linear-gradient(90deg, var(--green), #14532d);
+    }
+
+    .bar-fill.yellow {
+      background: linear-gradient(90deg, var(--yellow), #713f12);
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: -460px;
+      width: 440px;
+      max-width: 92vw;
+      height: 100vh;
+      background: white;
+      box-shadow: -10px 0 30px rgba(0,0,0,0.2);
+      padding: 24px;
+      transition: 0.2s;
+      z-index: 99;
+      overflow: auto;
+      border-left: 5px solid var(--red);
+    }
+
+    .drawer.open {
+      right: 0;
+    }
+
+    .drawer h2 {
+      margin-top: 0;
+    }
+
+    .drawer-close {
+      float: right;
+      background: var(--black);
+      color: white;
+      border: 0;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+
+    .insight {
+      border-left: 5px solid var(--red);
+      padding: 14px;
+      background: #fafafa;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .agent-card {
+      border-left: 5px solid var(--red);
+      margin-bottom: 12px;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 110px;
+    }
+
+    @media (max-width: 950px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      main { padding: 14px; }
+      .grid { grid-template-columns: 1fr; }
+      header { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Dashboard Comercial Grupo Pedra</h1>
+    <p>Centro de comando: Lemlist, Pipedrive, IA, aprovações, comparativos e melhorias.</p>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div>
+        <strong>Painel interno operacional</strong>
+        <div class="muted">Clique nos cards, campanhas e linhas para abrir informações detalhadas.</div>
+      </div>
+      <button class="btn" onclick="loadAll()">Atualizar dashboard</button>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab-btn active" onclick="showTab('geral', this)">Geral</button>
+      <button class="tab-btn" onclick="showTab('comparativos', this)">Comparativos Lemlist x Mercado</button>
+      <button class="tab-btn" onclick="showTab('campanhas', this)">Campanhas</button>
+      <button class="tab-btn" onclick="showTab('pipedrive', this)">Pipedrive</button>
+      <button class="tab-btn" onclick="showTab('mensagens', this)">Mensagens</button>
+      <button class="tab-btn" onclick="showTab('agentes', this)">Agentes IA</button>
+      <button class="tab-btn" onclick="showTab('melhorias', this)">Melhorias</button>
+      <button class="tab-btn" onclick="showTab('tempoReal', this)">Tempo Real</button>
+    </nav>
+
+    <section id="geral" class="tab active">
+      <div class="grid">
+        <div class="card dark clickable" onclick="openInfo('Campanhas', 'Total de campanhas encontradas no Lemlist. Inclui campanhas rodando, pausadas, rascunhos e arquivadas.')">
+          <h3>Total de campanhas</h3>
+          <div id="kpiCampaigns" class="number">-</div>
+        </div>
+        <div class="card clickable" onclick="openInfo('Campanhas rodando', 'Campanhas com status running. São as principais para análise comercial imediata.')">
+          <h3>Rodando</h3>
+          <div id="kpiRunning" class="number">-</div>
+        </div>
+        <div class="card clickable" onclick="openInfo('Campanhas pausadas', 'Campanhas pausadas podem conter histórico útil, mas não devem ser comparadas diretamente com campanhas ativas.')">
+          <h3>Pausadas</h3>
+          <div id="kpiPaused" class="number">-</div>
+        </div>
+        <div class="card clickable" onclick="openInfo('Aprovações pendentes', 'Respostas geradas pela IA aguardando aprovação humana antes de envio externo.')">
+          <h3>Aprovações</h3>
+          <div id="kpiApprovals" class="number">-</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Resumo executivo</h2>
+          <div id="executiveSummary">Carregando...</div>
+        </div>
+        <div class="panel">
+          <h2>Status das integrações</h2>
+          <div id="healthBox">Carregando...</div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="panel">
+          <h2>Distribuição das campanhas</h2>
+          <div id="statusBars"></div>
+        </div>
+        <div class="panel">
+          <h2>Pipeline rápido</h2>
+          <div id="pipelineQuick">Carregando...</div>
+        </div>
+        <div class="panel">
+          <h2>Próximas ações</h2>
+          <div id="nextActions">Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="comparativos" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Comparativo Lemlist x Mercado</h2>
+          <p class="muted">Clique em uma campanha na tabela para ver a análise lateral. Quando ainda não houver métricas reais de resposta/reunião, o painel marca como pendente.</p>
+          <div id="benchmarkBars"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Análise do comparativo</h2>
+          <div id="comparisonInsight">Carregando...</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Ranking comparativo de campanhas</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Campanha</th>
+                <th>Status</th>
+                <th>Arquivada</th>
+                <th>Score interno</th>
+                <th>Comparação mercado</th>
+                <th>Ação sugerida</th>
+              </tr>
+            </thead>
+            <tbody id="comparisonTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="campanhas" class="tab">
+      <div class="panel">
+        <h2>Campanhas Lemlist</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>ID</th>
+                <th>Status</th>
+                <th>Arquivada</th>
+                <th>Criada em</th>
+                <th>Sequence ID</th>
+              </tr>
+            </thead>
+            <tbody id="campaignTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="pipedrive" class="tab">
+      <div class="grid">
+        <div class="card dark"><h3>Negócios abertos</h3><div id="kpiDeals" class="number">-</div></div>
+        <div class="card"><h3>Atividades</h3><div id="kpiActivities" class="number">-</div></div>
+        <div class="card"><h3>Pipelines</h3><div id="kpiPipelines" class="number">-</div></div>
+        <div class="card"><h3>Status CRM</h3><div id="kpiCrm" class="number">-</div></div>
+      </div>
+
+      <div class="panel">
+        <h2>Negócios do Pipedrive</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Negócio</th>
+                <th>Valor</th>
+                <th>Status</th>
+                <th>Etapa</th>
+                <th>Criado em</th>
+              </tr>
+            </thead>
+            <tbody id="dealsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="mensagens" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Mensagens e performance</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mensagem</th>
+                  <th>Canal</th>
+                  <th>Campanha</th>
+                  <th>Respostas</th>
+                  <th>Reuniões</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody id="messagesTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Melhor mensagem</h2>
+          <div id="bestMessageBox">Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="agentes" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Agentes disponíveis</h2>
+          <div id="agentsBox"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Adicionar qualquer IA/agente</h2>
+          <p class="muted">Registre uma IA externa ou agente interno para análise futura.</p>
+          <input id="customAgentName" placeholder="Nome da IA ou agente" />
+          <br><br>
+          <textarea id="customAgentRole" placeholder="Função, especialidade e quando usar"></textarea>
+          <br><br>
+          <button class="btn" onclick="addCustomAgent()">Adicionar agente</button>
+          <div id="customAgentsBox"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="melhorias" class="tab">
+      <div class="panel">
+        <h2>Observações de melhorias</h2>
+        <div id="improvementsBox">Carregando...</div>
+      </div>
+    </section>
+
+    <section id="tempoReal" class="tab">
+      <div class="panel">
+        <h2>Mudanças em tempo real no Pipedrive</h2>
+        <p class="muted">Atualização automática a cada 20 segundos.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Título</th>
+                <th>Status</th>
+                <th>Atualizado/Criado</th>
+              </tr>
+            </thead>
+            <tbody id="realtimeTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside id="drawer" class="drawer">
+    <button class="drawer-close" onclick="closeDrawer()">Fechar</button>
+    <div id="drawerContent"></div>
+  </aside>
+
+  <script>
+    let globalCampaigns = [];
+    let globalApprovals = [];
+    let realtimeTimer;
+
+    const market = {
+      replyAvg: 8,
+      replyGood: 12,
+      replyExcellent: 18,
+      meetingAvg: 1,
+      meetingGood: 3,
+      meetingExcellent: 5
+    };
+
+    function showTab(id, button) {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      button.classList.add("active");
+
+      if (id === "tempoReal") {
+        loadRealtime();
+        clearInterval(realtimeTimer);
+        realtimeTimer = setInterval(loadRealtime, 20000);
+      } else {
+        clearInterval(realtimeTimer);
+      }
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url);
+      return await response.json();
+    }
+
+    function badge(status) {
+      return `<span class="badge ${status || 'draft'}">${status || '-'}</span>`;
+    }
+
+    function fmtDate(v) {
+      if (!v) return "-";
+      try { return new Date(v).toLocaleString("pt-BR"); } catch { return v; }
+    }
+
+    function openInfo(title, text) {
+      document.getElementById("drawerContent").innerHTML = `
+        <h2>${title}</h2>
+        <p>${text}</p>
+      `;
+      document.getElementById("drawer").classList.add("open");
+    }
+
+    function closeDrawer() {
+      document.getElementById("drawer").classList.remove("open");
+    }
+
+    function campaignScore(c) {
+      let score = 0;
+      if (c.status === "running") score += 70;
+      if (c.status === "paused") score += 35;
+      if (c.status === "draft") score += 15;
+      if (c.archived) score -= 20;
+
+      const name = (c.name || "").toLowerCase();
+      if (name.includes("pós") || name.includes("pos") || name.includes("gerente")) score += 10;
+      if (name.includes("diretor") || name.includes("ceo")) score += 8;
+      if (name.includes("compras")) score += 5;
+
+      return Math.max(0, Math.min(score, 100));
+    }
+
+    function marketComparison(score) {
+      if (score >= 80) return "acima da média potencial";
+      if (score >= 55) return "dentro da média potencial";
+      if (score >= 30) return "abaixo da média potencial";
+      return "sem força comercial no momento";
+    }
+
+    function actionSuggestion(c) {
+      if (c.archived) return "não priorizar; usar apenas como histórico";
+      if (c.status === "running") return "analisar respostas e criar follow-up comercial";
+      if (c.status === "paused") return "revisar mensagem antes de reativar";
+      return "não usar até finalizar estratégia e público";
+    }
+
+    function renderBar(label, value, max, colorClass = "") {
+      const width = Math.max(4, Math.min(100, (value / max) * 100));
+      return `
+        <div class="bar-row">
+          <div class="bar-label"><span>${label}</span><span>${value}</span></div>
+          <div class="bar-bg"><div class="bar-fill ${colorClass}" style="width:${width}%"></div></div>
+        </div>
+      `;
+    }
+
+    function openCampaign(c) {
+      const score = campaignScore(c);
+      document.getElementById("drawerContent").innerHTML = `
+        <h2>${c.name || "-"}</h2>
+        <p><strong>ID:</strong> ${c._id || "-"}</p>
+        <p><strong>Status:</strong> ${badge(c.status)}</p>
+        <p><strong>Arquivada:</strong> ${c.archived ? "sim" : "não"}</p>
+        <p><strong>Criada em:</strong> ${fmtDate(c.createdAt)}</p>
+        <p><strong>Sequence ID:</strong> ${c.sequenceId || "-"}</p>
+        <hr>
+        <h3>Análise automática</h3>
+        <p><strong>Score interno:</strong> ${score}/100</p>
+        <p><strong>Comparação com mercado:</strong> ${marketComparison(score)}</p>
+        <p><strong>Ação sugerida:</strong> ${actionSuggestion(c)}</p>
+        <div class="insight">
+          <strong>O que ainda falta para análise real:</strong>
+          <p>Precisamos puxar eventos reais da campanha: enviados, abertos, cliques, respostas, respostas positivas e reuniões. A estrutura já está pronta para receber esses dados.</p>
+        </div>
+      `;
+      document.getElementById("drawer").classList.add("open");
+    }
+
+    async function loadAll() {
+      const health = await fetchJson("/health");
+      const campaignsData = await fetchJson("/lemlist/campaigns");
+      const approvalsData = await fetchJson("/approvals?status=pending");
+
+      let agentsData = { agents: [] };
+      let messagesData = { messages: [], best_message: null };
+      let improvementsData = { improvements: [] };
+
+      try { agentsData = await fetchJson("/dashboard/agents"); } catch {}
+      try { messagesData = await fetchJson("/dashboard/messages"); } catch {}
+      try { improvementsData = await fetchJson("/dashboard/improvements"); } catch {}
+
+      globalCampaigns = campaignsData.campaigns || [];
+      globalApprovals = approvalsData.approvals || approvalsData.items || approvalsData.data || [];
+
+      const running = globalCampaigns.filter(c => c.status === "running").length;
+      const paused = globalCampaigns.filter(c => c.status === "paused").length;
+      const draft = globalCampaigns.filter(c => c.status === "draft").length;
+      const archived = globalCampaigns.filter(c => c.archived).length;
+
+      document.getElementById("kpiCampaigns").innerText = globalCampaigns.length;
+      document.getElementById("kpiRunning").innerText = running;
+      document.getElementById("kpiPaused").innerText = paused;
+      document.getElementById("kpiApprovals").innerText = Array.isArray(globalApprovals) ? globalApprovals.length : 0;
+
+      const env = health.env || {};
+      document.getElementById("healthBox").innerHTML = `
+        <p>OpenAI: ${env.openai_configured ? '<span class="badge ok">ok</span>' : '<span class="badge pending">falha</span>'}</p>
+        <p>Pipedrive: ${env.pipedrive_configured ? '<span class="badge ok">ok</span>' : '<span class="badge pending">falha</span>'}</p>
+        <p>Lemlist: ${env.lemlist_configured ? '<span class="badge ok">ok</span>' : '<span class="badge pending">falha</span>'}</p>
+        <p>Campanha padrão: ${env.lemlist_campaign_configured ? '<span class="badge ok">ok</span>' : '<span class="badge pending">falha</span>'}</p>
+      `;
+
+      document.getElementById("executiveSummary").innerHTML = `
+        <div class="insight">
+          <strong>Leitura geral:</strong>
+          <p>O sistema encontrou ${globalCampaigns.length} campanhas no Lemlist, sendo ${running} rodando, ${paused} pausadas, ${draft} em rascunho e ${archived} arquivadas.</p>
+        </div>
+        <div class="insight">
+          <strong>Controle humano:</strong>
+          <p>Existem ${globalApprovals.length || 0} respostas aguardando aprovação antes de qualquer envio externo.</p>
+        </div>
+      `;
+
+      document.getElementById("statusBars").innerHTML =
+        renderBar("Rodando", running, Math.max(globalCampaigns.length, 1), "green") +
+        renderBar("Pausadas", paused, Math.max(globalCampaigns.length, 1), "yellow") +
+        renderBar("Rascunho", draft, Math.max(globalCampaigns.length, 1)) +
+        renderBar("Arquivadas", archived, Math.max(globalCampaigns.length, 1));
+
+      document.getElementById("pipelineQuick").innerHTML = `
+        <p><strong>CRM:</strong> ${env.pipedrive_configured ? "conectado" : "não conectado"}</p>
+        <p><strong>Lemlist:</strong> ${env.lemlist_configured ? "conectado" : "não conectado"}</p>
+        <p><strong>IA:</strong> ${env.openai_configured ? "conectada" : "não conectada"}</p>
+      `;
+
+      document.getElementById("nextActions").innerHTML = `
+        <div class="insight">1. Priorizar campanhas running.</div>
+        <div class="insight">2. Separar análise por nicho: pós-venda, diretores, compras e máquinas amarelas.</div>
+        <div class="insight">3. Conectar eventos reais de resposta para medir melhor mensagem.</div>
+      `;
+
+      renderCampaigns();
+      renderComparatives();
+      renderAgents(agentsData);
+      renderMessages(messagesData);
+      renderImprovements(improvementsData);
+      loadPipedrive();
+    }
+
+    function renderCampaigns() {
+      document.getElementById("campaignTable").innerHTML = globalCampaigns.map((c, index) => `
+        <tr class="clickable-row" onclick="openCampaign(globalCampaigns[${index}])">
+          <td><strong>${c.name || "-"}</strong></td>
+          <td>${c._id || "-"}</td>
+          <td>${badge(c.status)}</td>
+          <td>${c.archived ? "sim" : "não"}</td>
+          <td>${fmtDate(c.createdAt)}</td>
+          <td>${c.sequenceId || "-"}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderComparatives() {
+      const running = globalCampaigns.filter(c => c.status === "running").length;
+      const paused = globalCampaigns.filter(c => c.status === "paused").length;
+      const draft = globalCampaigns.filter(c => c.status === "draft").length;
+
+      document.getElementById("benchmarkBars").innerHTML = `
+        <h3>Benchmark de mercado configurável</h3>
+        ${renderBar("Resposta média de mercado (%)", market.replyAvg, 20)}
+        ${renderBar("Resposta boa (%)", market.replyGood, 20, "yellow")}
+        ${renderBar("Resposta excelente (%)", market.replyExcellent, 20, "green")}
+        ${renderBar("Reunião média (%)", market.meetingAvg, 6)}
+        ${renderBar("Reunião boa (%)", market.meetingGood, 6, "yellow")}
+        ${renderBar("Reunião excelente (%)", market.meetingExcellent, 6, "green")}
+        <hr>
+        <h3>Base Lemlist atual</h3>
+        ${renderBar("Campanhas rodando", running, Math.max(globalCampaigns.length, 1), "green")}
+        ${renderBar("Campanhas pausadas", paused, Math.max(globalCampaigns.length, 1), "yellow")}
+        ${renderBar("Campanhas rascunho", draft, Math.max(globalCampaigns.length, 1))}
+      `;
+
+      document.getElementById("comparisonInsight").innerHTML = `
+        <div class="insight">
+          <strong>Comparação consolidada:</strong>
+          <p>Esta aba junta o Lemlist com a régua de mercado. No momento, o app já compara maturidade e status das campanhas. Para comparação de performance real, falta integrar eventos de enviados, respostas e reuniões.</p>
+        </div>
+        <div class="insight">
+          <strong>Critério atual de score:</strong>
+          <p>Running pesa mais, pausada pesa médio, rascunho pesa baixo e arquivada perde prioridade. Campanhas com público de pós-venda, gerentes, diretores e compras ganham relevância comercial.</p>
+        </div>
+      `;
+
+      document.getElementById("comparisonTable").innerHTML = globalCampaigns
+        .slice()
+        .sort((a, b) => campaignScore(b) - campaignScore(a))
+        .map((c, index) => `
+          <tr class="clickable-row" onclick="openCampaign(globalCampaigns.find(x => x._id === '${c._id}'))">
+            <td><strong>${c.name || "-"}</strong></td>
+            <td>${badge(c.status)}</td>
+            <td>${c.archived ? "sim" : "não"}</td>
+            <td>${campaignScore(c)}/100</td>
+            <td>${marketComparison(campaignScore(c))}</td>
+            <td>${actionSuggestion(c)}</td>
+          </tr>
+        `).join("");
+    }
+
+    function renderAgents(data) {
+      const agents = data.agents || [];
+      document.getElementById("agentsBox").innerHTML = agents.length ? agents.map(a => `
+        <div class="card agent-card clickable" onclick="openInfo('${a.name}', '${a.specialty} - Melhor uso: ${a.best_for}')">
+          <strong>${a.name}</strong>
+          <p>${a.specialty}</p>
+          <p class="muted">${a.best_for}</p>
+        </div>
+      `).join("") : `
+        <div class="insight">Endpoint de agentes ainda não encontrado. A aba está pronta, mas precisa do endpoint /dashboard/agents.</div>
+      `;
+    }
+
+    function addCustomAgent() {
+      const name = document.getElementById("customAgentName").value;
+      const role = document.getElementById("customAgentRole").value;
+
+      if (!name || !role) {
+        alert("Preencha nome e função do agente.");
+        return;
+      }
+
+      document.getElementById("customAgentsBox").innerHTML += `
+        <div class="card agent-card clickable" onclick="openInfo('${name}', '${role}')">
+          <strong>${name}</strong>
+          <p>${role}</p>
+        </div>
+      `;
+    }
+
+    function renderMessages(data) {
+      const messages = data.messages || [];
+      document.getElementById("messagesTable").innerHTML = messages.length ? messages.map(m => `
+        <tr class="clickable-row" onclick="openInfo('${m.name}', '${m.observation || "Mensagem em análise."}')">
+          <td><strong>${m.name}</strong></td>
+          <td>${m.channel}</td>
+          <td>${m.campaign}</td>
+          <td>${m.replies}</td>
+          <td>${m.meetings}</td>
+          <td>${m.score}</td>
+        </tr>
+      `).join("") : `
+        <tr><td colspan="6">Ainda não existem métricas reais de mensagens. Falta integrar eventos de respostas do Lemlist.</td></tr>
+      `;
+
+      const best = data.best_message;
+      document.getElementById("bestMessageBox").innerHTML = best ? `
+        <h3>${best.name}</h3>
+        <p>${best.observation}</p>
+        <p><strong>Score:</strong> ${best.score}</p>
+      ` : `
+        <div class="insight">Ainda não há mensagem vencedora. O app precisa registrar respostas e reuniões por mensagem.</div>
+      `;
+    }
+
+    function renderImprovements(data) {
+      const improvements = data.improvements || [];
+      const defaultItems = [
+        { area: "Lemlist", priority: "alta", recommendation: "Integrar eventos reais por campanha.", reason: "Sem enviados, respostas e reuniões, o dashboard mede estrutura, mas não performance real." },
+        { area: "Pipedrive", priority: "alta", recommendation: "Padronizar origem por campanha.", reason: "Todo negócio deve carregar campaign_id, canal e agente responsável." },
+        { area: "Mensagens", priority: "alta", recommendation: "Ranquear mensagens por resposta positiva.", reason: "Resposta comum não basta. O que importa é oportunidade comercial qualificada." }
+      ];
+
+      const items = improvements.length ? improvements : defaultItems;
+
+      document.getElementById("improvementsBox").innerHTML = items.map(i => `
+        <div class="card agent-card clickable" onclick="openInfo('${i.area}', '${i.recommendation} Motivo: ${i.reason}')">
+          <strong>${i.area} — prioridade ${i.priority}</strong>
+          <p>${i.recommendation}</p>
+          <p class="muted">${i.reason}</p>
+        </div>
+      `).join("");
+    }
+
+    async function loadPipedrive() {
+      try {
+        const deals = await fetchJson("/pipedrive/deals");
+        const activities = await fetchJson("/pipedrive/activities");
+        const pipelines = await fetchJson("/pipedrive/pipelines");
+
+        const dealItems = deals.data || [];
+        const activityItems = activities.data || [];
+        const pipelineItems = pipelines.data || [];
+
+        document.getElementById("kpiDeals").innerText = dealItems.length;
+        document.getElementById("kpiActivities").innerText = activityItems.length;
+        document.getElementById("kpiPipelines").innerText = pipelineItems.length;
+        document.getElementById("kpiCrm").innerText = deals.success ? "OK" : "ERRO";
+
+        document.getElementById("dealsTable").innerHTML = dealItems.length ? dealItems.map((d, index) => `
+          <tr class="clickable-row" onclick="openInfo('${d.title || "Negócio"}', 'Valor: ${d.value || 0}. Status: ${d.status || "-"}. Etapa: ${d.stage_id || "-"}.')">
+            <td><strong>${d.title || "-"}</strong></td>
+            <td>${d.value || 0}</td>
+            <td>${d.status || "-"}</td>
+            <td>${d.stage_id || "-"}</td>
+            <td>${fmtDate(d.add_time)}</td>
+          </tr>
+        `).join("") : `
+          <tr><td colspan="5">Nenhum negócio retornado ou endpoint Pipedrive ainda não está ativo.</td></tr>
+        `;
+      } catch (e) {
+        document.getElementById("kpiCrm").innerText = "ERRO";
+        document.getElementById("dealsTable").innerHTML = `
+          <tr><td colspan="5">Endpoints do Pipedrive ainda não encontrados. Ative /pipedrive/deals, /pipedrive/activities e /pipedrive/pipelines.</td></tr>
+        `;
+      }
+    }
+
+    async function loadRealtime() {
+      try {
+        const data = await fetchJson("/dashboard/realtime");
+        const deals = ((data.pipedrive || {}).deals || {}).data || [];
+        const activities = ((data.pipedrive || {}).activities || {}).data || [];
+
+        const rows = [
+          ...deals.map(d => ({ type: "Negócio", title: d.title, status: d.status, time: d.update_time || d.add_time })),
+          ...activities.map(a => ({ type: "Atividade", title: a.subject, status: a.done ? "feita" : "pendente", time: a.update_time || a.add_time }))
+        ];
+
+        document.getElementById("realtimeTable").innerHTML = rows.length ? rows.map(r => `
+          <tr class="clickable-row" onclick="openInfo('${r.title || "-"}', 'Tipo: ${r.type}. Status: ${r.status || "-"}. Data: ${fmtDate(r.time)}')">
+            <td>${r.type}</td>
+            <td><strong>${r.title || "-"}</strong></td>
+            <td>${r.status || "-"}</td>
+            <td>${fmtDate(r.time)}</td>
+          </tr>
+        `).join("") : `
+          <tr><td colspan="4">Nenhuma mudança recente encontrada ou endpoint de tempo real ainda não ativo.</td></tr>
+        `;
+      } catch (e) {
+        document.getElementById("realtimeTable").innerHTML = `
+          <tr><td colspan="4">Endpoint /dashboard/realtime ainda não encontrado.</td></tr>
+        `;
+      }
+    }
+
+    loadAll();
+  </script>
+</body>
+</html>

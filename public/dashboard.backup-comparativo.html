@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Central Comercial Grupo Pedra</title>
+
+  <style>
+    :root {
+      --preto: #0b0b0d;
+      --grafite: #18181b;
+      --cinza: #52525b;
+      --cinza-claro: #f4f4f5;
+      --branco: #ffffff;
+      --vermelho: #c1121f;
+      --vermelho-vivo: #ef233c;
+      --verde: #16a34a;
+      --amarelo: #ca8a04;
+      --azul: #2563eb;
+      --borda: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--cinza-claro);
+      color: var(--preto);
+    }
+
+    header {
+      background: linear-gradient(135deg, #050505, #202024);
+      color: var(--branco);
+      padding: 24px 32px;
+      border-bottom: 5px solid var(--vermelho);
+    }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .brand-logo {
+      width: 130px;
+      height: auto;
+      max-height: 58px;
+      object-fit: contain;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      display: block;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -0.4px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      color: #d4d4d8;
+      font-size: 15px;
+    }
+
+    main {
+      max-width: 1500px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .toolbar strong {
+      font-size: 18px;
+    }
+
+    .muted {
+      color: #71717a;
+      font-size: 14px;
+    }
+
+    .btn {
+      border: 0;
+      background: var(--vermelho);
+      color: var(--branco);
+      padding: 11px 15px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .btn:hover {
+      background: var(--vermelho-vivo);
+    }
+
+    .btn.secondary {
+      background: var(--preto);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--borda);
+      background: var(--branco);
+      padding: 11px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.15s;
+    }
+
+    .tab-btn:hover {
+      border-color: var(--vermelho);
+    }
+
+    .tab-btn.active {
+      background: var(--preto);
+      color: var(--branco);
+      border-color: var(--vermelho);
+      box-shadow: 0 8px 18px rgba(193, 18, 31, 0.22);
+    }
+
+    .tab {
+      display: none;
+    }
+
+    .tab.active {
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .card,
+    .panel {
+      background: var(--branco);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 10px 24px rgba(15, 15, 16, 0.08);
+      border: 1px solid var(--borda);
+    }
+
+    .card.dark {
+      background: var(--preto);
+      color: var(--branco);
+      border-bottom: 5px solid var(--vermelho);
+    }
+
+    .card h3 {
+      margin: 0;
+      color: #71717a;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .card.dark h3 {
+      color: #d4d4d8;
+    }
+
+    .number {
+      font-size: 34px;
+      font-weight: 900;
+      margin-top: 8px;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .status-running,
+    .status-approved,
+    .status-ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-paused,
+    .status-pending {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .status-draft {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .status-rejected {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .table-wrap {
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--borda);
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #fafafa;
+      color: #52525b;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    tr:hover {
+      background: #fff1f2;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid var(--borda);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+
+    textarea {
+      min-height: 110px;
+    }
+
+    .insight {
+      border-left: 5px solid var(--vermelho);
+      padding: 14px;
+      background: #fafafa;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: -500px;
+      width: 480px;
+      max-width: 92vw;
+      height: 100vh;
+      background: var(--branco);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.2);
+      padding: 24px;
+      transition: 0.2s;
+      z-index: 99;
+      overflow: auto;
+      border-left: 5px solid var(--vermelho);
+    }
+
+    .drawer.open {
+      right: 0;
+    }
+
+    .drawer-close {
+      float: right;
+      background: var(--preto);
+      color: var(--branco);
+      border: 0;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      background: #111;
+      color: #f4f4f5;
+      padding: 12px;
+      border-radius: 12px;
+      overflow: auto;
+      font-size: 12px;
+    }
+
+    @media (max-width: 950px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 14px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        padding: 22px;
+      }
+
+      .brand-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .brand-logo {
+        width: 120px;
+        max-height: 54px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand-header">
+      <img src="/public/logo-grupo-pedra.png" alt="Grupo Pedra" class="brand-logo" />
+      <div>
+        <h1>Central Comercial Grupo Pedra</h1>
+        <p>Campanhas, oportunidades, aprovações, agentes especialistas e controle de acessos.</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div>
+        <strong>Centro de comando interno</strong>
+        <div class="muted">Tudo que for criado pelo sistema fica aguardando aprovação antes de qualquer envio externo.</div>
+      </div>
+      <button class="btn" onclick="loadAll()">Atualizar central</button>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="geral">Geral</button>
+      <button class="tab-btn" data-tab="central">Central de Análise</button>
+      <button class="tab-btn" data-tab="campanha">Criar Campanha</button>
+      <button class="tab-btn" data-tab="agentes">Criar Agentes</button>
+      <button class="tab-btn" data-tab="aprovacoes">Aprovações</button>
+      <button class="tab-btn" data-tab="acessos">Login e Acessos</button>
+    </nav>
+
+    <section id="geral" class="tab active">
+      <div class="grid">
+        <div class="card dark">
+          <h3>Campanhas Lemlist</h3>
+          <div id="kpiCampaigns" class="number">-</div>
+        </div>
+        <div class="card">
+          <h3>Respostas pendentes</h3>
+          <div id="kpiReplies" class="number">-</div>
+        </div>
+        <div class="card">
+          <h3>Agentes cadastrados</h3>
+          <div id="kpiAgents" class="number">-</div>
+        </div>
+        <div class="card">
+          <h3>Campanhas criadas</h3>
+          <div id="kpiDrafts" class="number">-</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Resumo operacional</h2>
+          <div id="summaryBox">Carregando informações...</div>
+        </div>
+
+        <div class="panel">
+          <h2>Próximas ações recomendadas</h2>
+          <div class="insight">Priorizar campanhas em andamento e separar a análise por público: pós-venda, diretores, compras e máquinas amarelas.</div>
+          <div class="insight">Aprovar manualmente qualquer resposta, agente ou campanha antes do envio externo.</div>
+          <div class="insight">Medir no Pipedrive quais campanhas estão gerando oportunidades reais, não apenas respostas.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="central" class="tab">
+      <div class="panel">
+        <h2>Campanhas, tarefas e atividades analisadas</h2>
+        <p class="muted">Visão consolidada das campanhas do Lemlist, respostas pendentes, negócios e atividades do Pipedrive.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Origem</th>
+                <th>Nome/Título</th>
+                <th>Status</th>
+                <th>Responsável sugerido</th>
+                <th>Ação recomendada</th>
+              </tr>
+            </thead>
+            <tbody id="centralTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="campanha" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Gerar nova campanha para aprovação</h2>
+
+          <label>Objetivo da campanha</label>
+          <textarea id="campaignObjective" placeholder="Ex: gerar reuniões com gerentes de pós-venda de concessionárias de caminhões."></textarea>
+
+          <label>Público-alvo</label>
+          <input id="campaignAudience" placeholder="Ex: gerentes e diretores de pós-venda Volvo, Scania, Iveco..." />
+
+          <label>Oferta</label>
+          <input id="campaignOffer" placeholder="Ex: diagnóstico técnico da infraestrutura de pós-venda." />
+
+          <label>Dores principais</label>
+          <textarea id="campaignPain" placeholder="Ex: oficina travada, layout ruim, troca de óleo ineficiente, separadora inadequada..."></textarea>
+
+          <label>Agente responsável</label>
+          <select id="campaignAgent"></select>
+
+          <button class="btn" onclick="createCampaignDraft()">Gerar campanha para aprovação</button>
+        </div>
+
+        <div class="panel">
+          <h2>Campanhas aguardando decisão</h2>
+          <div id="campaignDraftsBox">Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="agentes" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Criar novo agente especialista</h2>
+
+          <label>Nome do agente</label>
+          <input id="agentName" placeholder="Ex: Agente Pós-Venda Volvo" />
+
+          <label>Especialidade</label>
+          <input id="agentSpecialty" placeholder="Ex: infraestrutura de pós-venda e concessionárias de caminhões" />
+
+          <label>Instruções do agente</label>
+          <textarea id="agentInstructions" placeholder="Explique como esse agente deve analisar leads, campanhas e respostas."></textarea>
+
+          <button class="btn" onclick="createAgent()">Criar agente para aprovação</button>
+        </div>
+
+        <div class="panel">
+          <h2>Agentes cadastrados</h2>
+          <div id="agentsBox">Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="aprovacoes" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Agentes aguardando aprovação</h2>
+          <div id="pendingAgentsBox">Carregando...</div>
+        </div>
+
+        <div class="panel">
+          <h2>Campanhas aguardando aprovação</h2>
+          <div id="pendingDraftsBox">Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="acessos" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Registrar acesso</h2>
+
+          <label>Quem acessou?</label>
+          <select id="loginName">
+            <option value="Jaasiel Gomes">Jaasiel Gomes</option>
+            <option value="Davi Vilela">Davi Vilela</option>
+            <option value="Estagiário">Estagiário</option>
+          </select>
+
+          <label>Perfil</label>
+          <select id="loginRole">
+            <option value="gestor">Gestor</option>
+            <option value="marketing_comercial">Marketing/Comercial</option>
+            <option value="estagiario">Estagiário</option>
+          </select>
+
+          <button class="btn" onclick="registerLogin()">Registrar entrada</button>
+        </div>
+
+        <div class="panel">
+          <h2>Histórico de acessos</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Perfil</th>
+                  <th>Data/Hora</th>
+                </tr>
+              </thead>
+              <tbody id="accessLogTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside id="drawer" class="drawer">
+    <button class="drawer-close" onclick="closeDrawer()">Fechar</button>
+    <div id="drawerContent"></div>
+  </aside>
+
+  <script>
+    let state = {
+      campaigns: [],
+      replies: [],
+      agents: [],
+      drafts: [],
+      accessLogs: [],
+      deals: [],
+      activities: []
+    };
+
+    function setupTabs() {
+      document.querySelectorAll(".tab-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          const tabId = button.getAttribute("data-tab");
+
+          document.querySelectorAll(".tab-btn").forEach(item => item.classList.remove("active"));
+          document.querySelectorAll(".tab").forEach(item => item.classList.remove("active"));
+
+          button.classList.add("active");
+          document.getElementById(tabId).classList.add("active");
+        });
+      });
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, options);
+      return await response.json();
+    }
+
+    function badge(status) {
+      const map = {
+        running: "Em andamento",
+        paused: "Pausada",
+        draft: "Rascunho",
+        pending: "Aguardando",
+        pending_approval: "Aguardando aprovação",
+        approved: "Aprovado",
+        approved_waiting_lemlist_creation: "Aprovado para criação",
+        rejected: "Rejeitado",
+        open: "Aberto",
+        won: "Ganho",
+        lost: "Perdido"
+      };
+
+      let css = "status-draft";
+      if (["running", "approved", "ok", "won"].includes(status)) css = "status-running";
+      if (["paused", "pending", "pending_approval", "approved_waiting_lemlist_creation"].includes(status)) css = "status-pending";
+      if (["rejected", "lost"].includes(status)) css = "status-rejected";
+
+      return `<span class="badge ${css}">${map[status] || status || "-"}</span>`;
+    }
+
+    function fmtDate(value) {
+      if (!value) return "-";
+      try {
+        return new Date(value).toLocaleString("pt-BR");
+      } catch {
+        return value;
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function openDrawer(title, content) {
+      document.getElementById("drawerContent").innerHTML = `<h2>${escapeHtml(title)}</h2>${content}`;
+      document.getElementById("drawer").classList.add("open");
+    }
+
+    function closeDrawer() {
+      document.getElementById("drawer").classList.remove("open");
+    }
+
+    async function loadAll() {
+      try {
+        const overview = await fetchJson("/ai-control/overview");
+
+        state.campaigns = overview.lemlist_campaigns?.campaigns || [];
+        state.replies = overview.pending_replies?.approvals || overview.pending_replies?.items || overview.pending_replies?.data || [];
+        state.agents = overview.agents || [];
+        state.drafts = overview.campaign_drafts || [];
+        state.accessLogs = overview.access_logs || [];
+        state.deals = overview.pipedrive?.deals?.data || [];
+        state.activities = overview.pipedrive?.activities?.data || [];
+
+        document.getElementById("kpiCampaigns").innerText = state.campaigns.length;
+        document.getElementById("kpiReplies").innerText = state.replies.length;
+        document.getElementById("kpiAgents").innerText = state.agents.length;
+        document.getElementById("kpiDrafts").innerText = state.drafts.length;
+
+        renderSummary();
+        renderCentral();
+        renderAgents();
+        renderCampaignDrafts();
+        renderApprovals();
+        renderAccessLogs();
+        fillAgentSelect();
+
+      } catch (error) {
+        openDrawer("Erro ao carregar", `<p>${escapeHtml(error)}</p>`);
+      }
+    }
+
+    function renderSummary() {
+      const running = state.campaigns.filter(c => c.status === "running").length;
+      const pendingAgents = state.agents.filter(a => a.status === "pending_approval").length;
+      const pendingDrafts = state.drafts.filter(d => d.status === "pending_approval").length;
+
+      document.getElementById("summaryBox").innerHTML = `
+        <div class="insight"><strong>Lemlist:</strong> ${state.campaigns.length} campanhas encontradas, ${running} em andamento.</div>
+        <div class="insight"><strong>Respostas:</strong> ${state.replies.length} aguardando aprovação.</div>
+        <div class="insight"><strong>Agentes:</strong> ${state.agents.length} cadastrados, ${pendingAgents} aguardando aprovação.</div>
+        <div class="insight"><strong>Campanhas criadas:</strong> ${state.drafts.length} rascunhos, ${pendingDrafts} aguardando aprovação.</div>
+        <div class="insight"><strong>Pipedrive:</strong> ${state.deals.length} negócios e ${state.activities.length} atividades carregadas.</div>
+      `;
+    }
+
+    function renderCentral() {
+      const rows = [];
+
+      state.campaigns.forEach(c => rows.push({
+        origin: "Lemlist",
+        title: c.name,
+        status: c.status,
+        owner: "Agente de Campanha",
+        action: "Avaliar campanha e comparar com oportunidades geradas.",
+        raw: c
+      }));
+
+      state.deals.forEach(d => rows.push({
+        origin: "Pipedrive - Negócio",
+        title: d.title,
+        status: d.status,
+        owner: "Comercial",
+        action: "Avaliar próxima etapa e tarefa de follow-up.",
+        raw: d
+      }));
+
+      state.activities.forEach(a => rows.push({
+        origin: "Pipedrive - Atividade",
+        title: a.subject,
+        status: a.done ? "approved" : "pending",
+        owner: "Comercial/SDR",
+        action: "Verificar prazo e conclusão da atividade.",
+        raw: a
+      }));
+
+      state.replies.forEach(r => rows.push({
+        origin: "Resposta criada",
+        title: r.lead_name || r.lead_email || r.approval_id,
+        status: r.status || "pending",
+        owner: r.specialist || "Agente Comercial",
+        action: "Aprovar, editar ou rejeitar antes de enviar.",
+        raw: r
+      }));
+
+      document.getElementById("centralTable").innerHTML = rows.map((r) => {
+        const raw = escapeHtml(JSON.stringify(r.raw, null, 2));
+        return `
+          <tr onclick="openDrawer('${escapeHtml(r.origin)}', '<p><strong>${escapeHtml(r.title)}</strong></p><p>Status: ${escapeHtml(r.status)}</p><p>Ação: ${escapeHtml(r.action)}</p><pre>${raw}</pre>')">
+            <td>${escapeHtml(r.origin)}</td>
+            <td><strong>${escapeHtml(r.title)}</strong></td>
+            <td>${badge(r.status)}</td>
+            <td>${escapeHtml(r.owner)}</td>
+            <td>${escapeHtml(r.action)}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function fillAgentSelect() {
+      const approved = state.agents.filter(a => a.status === "approved");
+      const baseOptions = [
+        `<option value="gpedra_comercial">GPedra Comercial</option>`,
+        `<option value="gpedra_engenharia">GPedra Engenharia</option>`,
+        `<option value="gpedra_tech">GPedra Tech</option>`,
+        `<option value="gmarket">GMarket</option>`
+      ];
+
+      const customOptions = approved.map(a => `<option value="${escapeHtml(a.agent_id)}">${escapeHtml(a.name)}</option>`);
+      document.getElementById("campaignAgent").innerHTML = [...baseOptions, ...customOptions].join("");
+    }
+
+    async function createCampaignDraft() {
+      const payload = {
+        objective: document.getElementById("campaignObjective").value,
+        target_audience: document.getElementById("campaignAudience").value,
+        offer: document.getElementById("campaignOffer").value,
+        pain_points: document.getElementById("campaignPain").value,
+        agent_id: document.getElementById("campaignAgent").value,
+        created_by: "Jaasiel"
+      };
+
+      const result = await fetchJson("/ai/campaign-drafts", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+      });
+
+      openDrawer("Campanha criada para aprovação", `<pre>${escapeHtml(JSON.stringify(result, null, 2))}</pre>`);
+      loadAll();
+    }
+
+    async function createAgent() {
+      const payload = {
+        name: document.getElementById("agentName").value,
+        specialty: document.getElementById("agentSpecialty").value,
+        instructions: document.getElementById("agentInstructions").value,
+        created_by: "Jaasiel"
+      };
+
+      const result = await fetchJson("/ai-agents", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+      });
+
+      openDrawer("Agente criado para aprovação", `<pre>${escapeHtml(JSON.stringify(result, null, 2))}</pre>`);
+      loadAll();
+    }
+
+    function renderAgents() {
+      document.getElementById("agentsBox").innerHTML = state.agents.length ? state.agents.map(a => `
+        <div class="insight">
+          <strong>${escapeHtml(a.name)}</strong> ${badge(a.status)}
+          <p>${escapeHtml(a.specialty)}</p>
+          <button class="btn secondary" onclick="openDrawer('${escapeHtml(a.name)}', '<pre>${escapeHtml(JSON.stringify(a, null, 2))}</pre>')">Ver detalhes</button>
+        </div>
+      `).join("") : `<div class="insight">Nenhum agente personalizado criado ainda.</div>`;
+    }
+
+    function renderCampaignDrafts() {
+      document.getElementById("campaignDraftsBox").innerHTML = state.drafts.length ? state.drafts.map(d => `
+        <div class="insight">
+          <strong>${escapeHtml(d.objective)}</strong> ${badge(d.status)}
+          <p><strong>Público:</strong> ${escapeHtml(d.target_audience)}</p>
+          <button class="btn secondary" onclick="openDrawer('Campanha criada', '<pre>${escapeHtml(JSON.stringify(d, null, 2))}</pre>')">Ver detalhes</button>
+        </div>
+      `).join("") : `<div class="insight">Nenhuma campanha criada ainda.</div>`;
+    }
+
+    function renderApprovals() {
+      const pendingAgents = state.agents.filter(a => a.status === "pending_approval");
+      const pendingDrafts = state.drafts.filter(d => d.status === "pending_approval");
+
+      document.getElementById("pendingAgentsBox").innerHTML = pendingAgents.length ? pendingAgents.map(a => `
+        <div class="insight">
+          <strong>${escapeHtml(a.name)}</strong>
+          <p>${escapeHtml(a.specialty)}</p>
+          <button class="btn" onclick="decideAgent('${a.agent_id}', 'approve')">Aprovar agente</button>
+          <button class="btn secondary" onclick="decideAgent('${a.agent_id}', 'reject')">Rejeitar</button>
+        </div>
+      `).join("") : `<div class="insight">Nenhum agente pendente.</div>`;
+
+      document.getElementById("pendingDraftsBox").innerHTML = pendingDrafts.length ? pendingDrafts.map(d => `
+        <div class="insight">
+          <strong>${escapeHtml(d.objective)}</strong>
+          <p>${escapeHtml(d.target_audience)}</p>
+          <button class="btn" onclick="decideDraft('${d.draft_id}', 'approve')">Aprovar campanha</button>
+          <button class="btn secondary" onclick="decideDraft('${d.draft_id}', 'reject')">Rejeitar</button>
+        </div>
+      `).join("") : `<div class="insight">Nenhuma campanha pendente.</div>`;
+    }
+
+    async function decideAgent(agentId, decision) {
+      const result = await fetchJson("/ai-agents/decision", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({agent_id: agentId, decision, reviewer: "Jaasiel"})
+      });
+
+      openDrawer("Decisão registrada", `<pre>${escapeHtml(JSON.stringify(result, null, 2))}</pre>`);
+      loadAll();
+    }
+
+    async function decideDraft(draftId, decision) {
+      const result = await fetchJson("/ai/campaign-drafts/decision", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({draft_id: draftId, decision, reviewer: "Jaasiel"})
+      });
+
+      openDrawer("Decisão registrada", `<pre>${escapeHtml(JSON.stringify(result, null, 2))}</pre>`);
+      loadAll();
+    }
+
+    async function registerLogin() {
+      const payload = {
+        name: document.getElementById("loginName").value,
+        role: document.getElementById("loginRole").value
+      };
+
+      const result = await fetchJson("/auth/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+      });
+
+      openDrawer("Acesso registrado", `<pre>${escapeHtml(JSON.stringify(result, null, 2))}</pre>`);
+      loadAll();
+    }
+
+    function renderAccessLogs() {
+      document.getElementById("accessLogTable").innerHTML = state.accessLogs.length ? state.accessLogs.slice().reverse().map(l => `
+        <tr>
+          <td>${escapeHtml(l.name)}</td>
+          <td>${escapeHtml(l.role)}</td>
+          <td>${fmtDate(l.accessed_at)}</td>
+        </tr>
+      `).join("") : `<tr><td colspan="3">Nenhum acesso registrado ainda.</td></tr>`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setupTabs();
+      loadAll();
+    });
+  </script>
+</body>
+</html>

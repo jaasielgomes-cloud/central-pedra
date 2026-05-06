@@ -1,0 +1,1077 @@
+import os
+import base64
+import json
+import uuid
+import datetime
+from typing import Any, Dict, Optional
+
+import requests
+from dotenv import load_dotenv
+from fastapi import FastAPI, Header, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel, Field
+
+
+load_dotenv()
+
+APP_NAME = "Internal Sales Automation - Grupo Pedra"
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+
+PIPEDRIVE_API_KEY = os.getenv("PIPEDRIVE_API_KEY") or os.getenv("PIPEDRIVE_API_TOKEN", "")
+PIPEDRIVE_BASE_URL = os.getenv("PIPEDRIVE_BASE_URL", "https://api.pipedrive.com").rstrip("/")
+
+LEMLIST_API_KEY = os.getenv("LEMLIST_API_KEY", "")
+LEMLIST_CAMPAIGN_ID = os.getenv("LEMLIST_CAMPAIGN_ID", "")
+LEMLIST_BASE_URL = os.getenv("LEMLIST_BASE_URL", "https://api.lemlist.com").rstrip("/")
+LEMLIST_WEBHOOK_TOKEN = os.getenv("LEMLIST_WEBHOOK_TOKEN", "dev-token")
+
+APPROVALS_FILE = "approvals_queue.jsonl"
+LOG_FILE = "events_log.jsonl"
+
+load_dotenv()
+
+app = FastAPI(
+    title=APP_NAME,
+    description="MVP interno para analisar leads do Lemlist com OpenAI, criar registros no Pipedrive e exigir aprovação humana antes de responder.",
+    version="0.1.0",
+)
+
+app.mount("/public", StaticFiles(directory="public"), name="public")
+
+
+class LeadEvent(BaseModel):
+    lead_email: str = Field(..., description="Email do lead")
+    lead_name: Optional[str] = Field(default=None, description="Nome do lead")
+    company_name: Optional[str] = Field(default=None, description="Empresa do lead")
+    message: str = Field(..., description="Mensagem recebida do lead")
+    source: str = Field(default="manual_simulate", description="Origem do evento")
+    campaign_id: Optional[str] = Field(default=None, description="ID da campanha Lemlist, se houver")
+
+
+class ApprovalDecision(BaseModel):
+    approval_id: str
+    decision: str = Field(..., description="approve ou reject")
+    edited_reply: Optional[str] = Field(default=None, description="Resposta editada antes do envio")
+    reviewer: Optional[str] = Field(default="Jaasiel", description="Quem aprovou/rejeitou")
+
+
+def now_iso() -> str:
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+def append_jsonl(path: str, data: Dict[str, Any]) -> None:
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(data, ensure_ascii=False) + "\n")
+
+
+def read_jsonl(path: str) -> list[Dict[str, Any]]:
+    if not os.path.exists(path):
+        return []
+    rows = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    return rows
+
+
+def choose_specialist(message: str) -> str:
+    text = message.lower()
+    if any(word in text for word in ["preço", "valor", "orçamento", "custo", "barato", "caro", "budget"]):
+        return "pricing_agent"
+    if any(word in text for word in ["técnico", "obra", "projeto", "vala", "óleo", "efluente", "layout", "norma", "engenharia"]):
+        return "technical_agent"
+    if any(word in text for word in ["contrato", "jurídico", "compliance", "documento", "norma", "rdo", "abnt"]):
+        return "compliance_agent"
+    return "sdr_agent"
+
+
+def fallback_analysis(event: LeadEvent, specialist: str) -> Dict[str, Any]:
+    msg = event.message.lower()
+    intent = "interesse_inicial"
+    urgency_score = 50
+    next_action = "Criar tarefa de follow-up consultivo no Pipedrive e preparar resposta para aprovação."
+
+    if any(w in msg for w in ["orçamento", "preço", "valor", "proposta"]):
+        intent = "pedido_de_orcamento"
+        urgency_score = 85
+        next_action = "Solicitar dados mínimos para diagnóstico e propor reunião rápida."
+    elif any(w in msg for w in ["reunião", "agenda", "conversar", "call"]):
+        intent = "pedido_de_reuniao"
+        urgency_score = 90
+        next_action = "Sugerir horários e registrar atividade de reunião no Pipedrive."
+    elif any(w in msg for w in ["não", "sem interesse", "agora não"]):
+        intent = "objeção_ou_desinteresse"
+        urgency_score = 35
+        next_action = "Responder com baixo atrito e manter nutrição futura."
+
+    reply = (
+        f"Olá{f' {event.lead_name}' if event.lead_name else ''}, obrigado pelo retorno. "
+        "Antes de avançarmos com qualquer proposta, o ideal é entender rapidamente o contexto da sua operação "
+        "para indicarmos uma solução coerente, sem superdimensionar custo nem escopo. "
+        "Podemos seguir com um diagnóstico inicial?"
+    )
+
+    return {
+        "intent": intent,
+        "urgency_score": urgency_score,
+        "next_action": next_action,
+        "reply_ptbr": reply,
+        "deal_label": intent,
+        "specialist": specialist,
+        "analysis_source": "fallback_local",
+    }
+
+
+def analyze_with_openai(event: LeadEvent, specialist: str) -> Dict[str, Any]:
+    if not OPENAI_API_KEY:
+        return fallback_analysis(event, specialist)
+
+    system_prompt = f"""
+Você é um agente especialista do Grupo Pedra.
+Especialista ativo: {specialist}
+
+Contexto:
+- Grupo Pedra atua com engenharia, infraestrutura, concessionárias de caminhões, Pedra Tech e automação de pós-venda.
+- A resposta nunca deve ser enviada automaticamente. Ela será apenas um rascunho para aprovação humana.
+- Seja consultivo, objetivo e comercialmente inteligente.
+- Retorne APENAS JSON válido.
+
+Campos obrigatórios:
+intent, urgency_score, next_action, reply_ptbr, deal_label, specialist
+"""
+
+    user_prompt = {
+        "lead_email": event.lead_email,
+        "lead_name": event.lead_name,
+        "company_name": event.company_name,
+        "message": event.message,
+        "source": event.source,
+    }
+
+    try:
+        resp = requests.post(
+            "https://api.openai.com/v1/responses",
+            headers={
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": OPENAI_MODEL,
+                "input": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": json.dumps(user_prompt, ensure_ascii=False)},
+                ],
+                "temperature": 0.2,
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        text = data.get("output_text", "")
+        parsed = json.loads(text)
+        parsed["analysis_source"] = "openai"
+        return parsed
+    except Exception as exc:
+        fallback = fallback_analysis(event, specialist)
+        fallback["openai_error"] = str(exc)
+        return fallback
+
+
+def pipedrive_request(method: str, path: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    if not PIPEDRIVE_API_KEY:
+        return {"ok": False, "status": "missing_pipedrive_key"}
+
+    url = f"{PIPEDRIVE_BASE_URL}{path}"
+    params = {"api_token": PIPEDRIVE_API_KEY}
+
+    try:
+        resp = requests.request(method, url, params=params, json=payload, timeout=30)
+        return {
+            "ok": resp.ok,
+            "status_code": resp.status_code,
+            "response": resp.json() if resp.content else None,
+        }
+    except Exception as exc:
+        return {"ok": False, "status": "request_failed", "error": str(exc)}
+
+
+def sync_pipedrive(event: LeadEvent, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    person_payload = {
+        "name": event.lead_name or event.lead_email,
+        "email": [{"value": event.lead_email, "primary": True}],
+        "org_name": event.company_name or "",
+    }
+    person = pipedrive_request("POST", "/v1/persons", person_payload)
+    person_id = None
+    try:
+        person_id = person["response"]["data"]["id"]
+    except Exception:
+        pass
+
+    deal_payload = {
+        "title": f"{event.company_name or event.lead_email} - {analysis.get('intent', 'novo_lead')}",
+        "person_id": person_id,
+        "status": "open",
+    }
+    deal = pipedrive_request("POST", "/v1/deals", deal_payload)
+    deal_id = None
+    try:
+        deal_id = deal["response"]["data"]["id"]
+    except Exception:
+        pass
+
+    note_payload = {
+        "content": (
+            f"<b>Lead analisado por IA</b><br>"
+            f"Especialista: {analysis.get('specialist')}<br>"
+            f"Intenção: {analysis.get('intent')}<br>"
+            f"Score: {analysis.get('urgency_score')}<br>"
+            f"Próxima ação: {analysis.get('next_action')}<br>"
+            f"Mensagem original: {event.message}<br>"
+            f"Rascunho pendente de aprovação: {analysis.get('reply_ptbr')}"
+        ),
+        "deal_id": deal_id,
+        "person_id": person_id,
+    }
+    note = pipedrive_request("POST", "/v1/notes", note_payload)
+
+    activity_payload = {
+        "subject": f"Aprovar resposta IA - {analysis.get('intent')}",
+        "type": "task",
+        "done": 0,
+        "person_id": person_id,
+        "deal_id": deal_id,
+        "note": analysis.get("next_action"),
+    }
+    activity = pipedrive_request("POST", "/v1/activities", activity_payload)
+
+    return {
+        "person": person,
+        "deal": deal,
+        "note": note,
+        "activity": activity,
+        "person_id": person_id,
+        "deal_id": deal_id,
+    }
+
+
+def queue_approval(event: LeadEvent, analysis: Dict[str, Any], pipedrive_result: Dict[str, Any]) -> Dict[str, Any]:
+    approval = {
+        "approval_id": str(uuid.uuid4()),
+        "status": "pending",
+        "created_at": now_iso(),
+        "lead": event.model_dump(),
+        "analysis": analysis,
+        "pipedrive": {
+            "person_id": pipedrive_result.get("person_id"),
+            "deal_id": pipedrive_result.get("deal_id"),
+        },
+    }
+    append_jsonl(APPROVALS_FILE, approval)
+    return approval
+
+
+def send_lemlist_reply(approval: Dict[str, Any], reply: str) -> Dict[str, Any]:
+    if not LEMLIST_API_KEY:
+        return {"ok": False, "status": "missing_lemlist_key"}
+
+    lead_email = approval["lead"]["lead_email"]
+    campaign_id = approval["lead"].get("campaign_id") or LEMLIST_CAMPAIGN_ID
+
+    if not campaign_id:
+        return {"ok": False, "status": "missing_lemlist_campaign_id"}
+
+    # Observação: confirme o endpoint exato conforme sua conta/API Lemlist.
+    # Este MVP centraliza a chamada para facilitar ajuste fino.
+    url = f"{LEMLIST_BASE_URL}/api/campaigns/{campaign_id}/leads/{lead_email}/activities"
+    payload = {
+        "type": "manualReply",
+        "text": reply,
+    }
+
+    try:
+        resp = requests.post(
+            url,
+            auth=("", LEMLIST_API_KEY),
+            json=payload,
+            timeout=30,
+        )
+        return {
+            "ok": resp.ok,
+            "status_code": resp.status_code,
+            "response": resp.json() if resp.content else None,
+        }
+    except Exception as exc:
+        return {"ok": False, "status": "request_failed", "error": str(exc)}
+
+
+def process_event(event: LeadEvent) -> Dict[str, Any]:
+    specialist = choose_specialist(event.message)
+    analysis = analyze_with_openai(event, specialist)
+    pipedrive_result = sync_pipedrive(event, analysis)
+    approval = queue_approval(event, analysis, pipedrive_result)
+
+    result = {
+        "ok": True,
+        "message": "Lead processado. Resposta ficou pendente para aprovação humana.",
+        "approval_id": approval["approval_id"],
+        "specialist": specialist,
+        "analysis": analysis,
+        "pipedrive": pipedrive_result,
+        "approval_status": "pending",
+    }
+    append_jsonl(LOG_FILE, {"created_at": now_iso(), "type": "process_event", "result": result})
+    return result
+
+
+@app.get("/health")
+def health() -> Dict[str, Any]:
+    return {
+        "ok": True,
+        "app": APP_NAME,
+        "time": now_iso(),
+        "env": {
+            "openai_configured": bool(OPENAI_API_KEY),
+            "pipedrive_configured": bool(PIPEDRIVE_API_KEY),
+            "lemlist_configured": bool(LEMLIST_API_KEY),
+            "lemlist_campaign_configured": bool(LEMLIST_CAMPAIGN_ID),
+        },
+    }
+
+
+@app.post("/simulate")
+def simulate(event: LeadEvent) -> Dict[str, Any]:
+    return process_event(event)
+
+
+@app.post("/webhooks/lemlist")
+def lemlist_webhook(event: LeadEvent, x_webhook_token: Optional[str] = Header(default=None)) -> Dict[str, Any]:
+    if LEMLIST_WEBHOOK_TOKEN and x_webhook_token != LEMLIST_WEBHOOK_TOKEN:
+        raise HTTPException(status_code=401, detail="Webhook token inválido")
+    return process_event(event)
+
+
+@app.get("/approvals")
+def list_approvals(status: Optional[str] = "pending") -> Dict[str, Any]:
+    approvals = read_jsonl(APPROVALS_FILE)
+    if status:
+        approvals = [a for a in approvals if a.get("status") == status]
+    return {"ok": True, "total": len(approvals), "items": approvals}
+
+
+@app.post("/approvals/decision")
+def approval_decision(decision: ApprovalDecision) -> Dict[str, Any]:
+    approvals = read_jsonl(APPROVALS_FILE)
+    selected = None
+    for item in approvals:
+        if item.get("approval_id") == decision.approval_id:
+            selected = item
+            break
+
+    if not selected:
+        raise HTTPException(status_code=404, detail="approval_id não encontrado")
+
+    if selected.get("status") != "pending":
+        return {"ok": False, "message": "Este item já foi decidido.", "approval": selected}
+
+    normalized = decision.decision.strip().lower()
+    if normalized not in ["approve", "reject"]:
+        raise HTTPException(status_code=400, detail="decision deve ser approve ou reject")
+
+    reply = decision.edited_reply or selected["analysis"].get("reply_ptbr", "")
+
+    lemlist_result = None
+    if normalized == "approve":
+        lemlist_result = send_lemlist_reply(selected, reply)
+
+    selected["status"] = "approved" if normalized == "approve" else "rejected"
+    selected["decided_at"] = now_iso()
+    selected["reviewer"] = decision.reviewer
+    selected["final_reply"] = reply
+    selected["lemlist_result"] = lemlist_result
+
+    # Regrava fila inteira de forma simples para MVP.
+    with open(APPROVALS_FILE, "w", encoding="utf-8") as f:
+        for item in approvals:
+            if item.get("approval_id") == decision.approval_id:
+                item = selected
+            f.write(json.dumps(item, ensure_ascii=False) + "\n")
+
+    append_jsonl(LOG_FILE, {"created_at": now_iso(), "type": "approval_decision", "approval": selected})
+    return {"ok": True, "message": "Decisão registrada.", "approval": selected}
+
+
+def lemlist_auth_headers():
+    api_key = os.getenv("LEMLIST_API_KEY")
+
+    if not api_key:
+        return None
+
+    token = base64.b64encode(f":{api_key}".encode("utf-8")).decode("utf-8")
+
+    return {
+        "Authorization": f"Basic {token}",
+        "Content-Type": "application/json",
+    }
+
+
+@app.get("/lemlist/campaigns")
+def list_lemlist_campaigns():
+    headers = lemlist_auth_headers()
+
+    if not headers:
+        return {
+            "ok": False,
+            "error": "missing_lemlist_api_key",
+            "campaigns": [],
+        }
+
+    base_url = os.getenv("LEMLIST_BASE_URL", "https://api.lemlist.com/api").rstrip("/")
+
+    try:
+        response = requests.get(
+            f"{base_url}/campaigns",
+            headers=headers,
+            timeout=30,
+        )
+
+        if response.status_code >= 400:
+            return {
+                "ok": False,
+                "status_code": response.status_code,
+                "error": response.text,
+                "campaigns": [],
+            }
+
+        data = response.json()
+
+        return {
+            "ok": True,
+            "total": len(data) if isinstance(data, list) else 1,
+            "campaigns": data,
+        }
+
+    except Exception as error:
+        return {
+            "ok": False,
+            "error": str(error),
+            "campaigns": [],
+        }
+
+
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard():
+    dashboard_path = "public/dashboard.html"
+
+    try:
+        with open(dashboard_path, "r", encoding="utf-8") as file:
+            return file.read()
+    except FileNotFoundError:
+        return "<h1>Dashboard não encontrado</h1><p>Crie o arquivo public/dashboard.html.</p>"
+
+
+# =========================
+# DASHBOARD AVANÇADO
+# =========================
+
+MARKET_BENCHMARKS = {
+    "reply_rate_avg": 8,
+    "reply_rate_good": 12,
+    "reply_rate_excellent": 18,
+    "positive_reply_avg": 3,
+    "positive_reply_good": 6,
+    "positive_reply_excellent": 10,
+    "meeting_rate_avg": 1,
+    "meeting_rate_good": 3,
+    "meeting_rate_excellent": 5,
+}
+
+
+AGENTS_REGISTRY = [
+    {
+        "id": "gpedra_comercial",
+        "name": "GPedra Comercial",
+        "specialty": "Vendas B2B, SPIN Selling, abordagem consultiva e priorização de oportunidades",
+        "best_for": "Leads com interesse comercial, pedido de reunião, orçamento ou expansão",
+    },
+    {
+        "id": "gpedra_engenharia",
+        "name": "GPedra Engenharia",
+        "specialty": "Obras, infraestrutura, concessionárias, pós-venda e viabilidade técnica",
+        "best_for": "Leads técnicos, dúvidas sobre obra, layout, operação, valas, eficiência e adequações",
+    },
+    {
+        "id": "gpedra_tech",
+        "name": "GPedra Tech",
+        "specialty": "Lubrificação, efluentes, separadores, tecnologia operacional e manutenção industrial",
+        "best_for": "Leads sobre sistemas de óleo, separadora água/óleo, manutenção e tecnologia",
+    },
+    {
+        "id": "gmarket",
+        "name": "GMarket",
+        "specialty": "Copywriting, mensagens, campanhas, social selling e melhoria de conversão",
+        "best_for": "Análise de mensagens, teste A/B, respostas, headlines e melhoria de campanhas",
+    },
+    {
+        "id": "custom_ai",
+        "name": "IA Personalizada",
+        "specialty": "Espaço livre para cadastrar qualquer IA ou agente externo",
+        "best_for": "Claude, Gemini, Perplexity, Manus, agente próprio ou outra IA conectada futuramente",
+    },
+]
+
+
+MESSAGE_PERFORMANCE = [
+    {
+        "id": "msg_001",
+        "name": "Dor operacional no pós-venda",
+        "channel": "LinkedIn",
+        "campaign": "Gerentes Pós-Vendas — PEDRA v3",
+        "sent": 0,
+        "replies": 0,
+        "positive_replies": 0,
+        "meetings": 0,
+        "score": 0,
+        "observation": "Aguardando integração com eventos reais de resposta.",
+    },
+    {
+        "id": "msg_002",
+        "name": "Adequação de infraestrutura",
+        "channel": "Email",
+        "campaign": "Gerentes de Pós-Vendas — Sofia 14D",
+        "sent": 0,
+        "replies": 0,
+        "positive_replies": 0,
+        "meetings": 0,
+        "score": 0,
+        "observation": "Base preparada para ranquear a melhor mensagem.",
+    },
+]
+
+
+def pipedrive_get(path: str, params: Optional[Dict[str, Any]] = None):
+    api_key = os.getenv("PIPEDRIVE_API_KEY") or os.getenv("PIPEDRIVE_API_TOKEN")
+
+    if not api_key:
+        return {
+            "ok": False,
+            "error": "missing_pipedrive_api_key",
+        }
+
+    base_url = os.getenv("PIPEDRIVE_BASE_URL", "https://api.pipedrive.com").rstrip("/")
+
+    query = params.copy() if params else {}
+    query["api_token"] = api_key
+
+    try:
+        response = requests.get(
+            f"{base_url}/v1{path}",
+            params=query,
+            timeout=30,
+        )
+
+        if response.status_code >= 400:
+            return {
+                "ok": False,
+                "status_code": response.status_code,
+                "error": response.text,
+            }
+
+        return response.json()
+
+    except Exception as error:
+        return {
+            "ok": False,
+            "error": str(error),
+        }
+
+
+@app.get("/dashboard/benchmarks")
+def dashboard_benchmarks():
+    return {
+        "ok": True,
+        "benchmarks": MARKET_BENCHMARKS,
+        "note": "Benchmarks internos configuráveis. Ajustar por nicho: pós-venda, diretores, máquinas amarelas, compras e novos negócios.",
+    }
+
+
+@app.get("/dashboard/agents")
+def dashboard_agents():
+    return {
+        "ok": True,
+        "agents": AGENTS_REGISTRY,
+    }
+
+
+@app.get("/dashboard/messages")
+def dashboard_messages():
+    ranked = sorted(MESSAGE_PERFORMANCE, key=lambda item: item.get("score", 0), reverse=True)
+
+    return {
+        "ok": True,
+        "total": len(ranked),
+        "messages": ranked,
+        "best_message": ranked[0] if ranked else None,
+    }
+
+
+@app.get("/dashboard/improvements")
+def dashboard_improvements():
+    return {
+        "ok": True,
+        "improvements": [
+            {
+                "area": "Campanhas Lemlist",
+                "priority": "alta",
+                "recommendation": "Separar análise por nicho: pós-venda, diretores, compras, máquinas amarelas e novos negócios.",
+                "reason": "Cada público responde a dores diferentes. Comparar tudo junto distorce a leitura.",
+            },
+            {
+                "area": "Mensagens",
+                "priority": "alta",
+                "recommendation": "Criar tags de intenção: interesse, preço, reunião, objeção, sem fit e técnico.",
+                "reason": "Isso permite saber qual mensagem gera oportunidade real, e não apenas resposta.",
+            },
+            {
+                "area": "Pipedrive",
+                "priority": "média",
+                "recommendation": "Padronizar origem do negócio com campanha, canal e agente responsável.",
+                "reason": "Sem origem padronizada, fica difícil provar qual campanha gerou pipeline.",
+            },
+            {
+                "area": "IA",
+                "priority": "alta",
+                "recommendation": "Manter aprovação humana obrigatória antes de qualquer resposta externa.",
+                "reason": "Protege a reputação comercial do Grupo Pedra e evita respostas fora do posicionamento.",
+            },
+        ],
+    }
+
+
+@app.get("/pipedrive/deals")
+def dashboard_pipedrive_deals(status: str = "open", limit: int = 50):
+    return pipedrive_get("/deals", {"status": status, "limit": limit})
+
+
+@app.get("/pipedrive/activities")
+def dashboard_pipedrive_activities(limit: int = 50):
+    return pipedrive_get("/activities", {"limit": limit})
+
+
+@app.get("/pipedrive/pipelines")
+def dashboard_pipedrive_pipelines():
+    return pipedrive_get("/pipelines")
+
+
+@app.get("/dashboard/realtime")
+def dashboard_realtime():
+    deals = pipedrive_get("/deals", {"status": "open", "limit": 20})
+    activities = pipedrive_get("/activities", {"limit": 20})
+
+    return {
+        "ok": True,
+        "pipedrive": {
+            "deals": deals,
+            "activities": activities,
+        },
+    }
+
+
+@app.get("/dashboard/full")
+def dashboard_full():
+    campaigns = list_lemlist_campaigns()
+    approvals = list_approvals(status="pending")
+    agents = dashboard_agents()
+    messages = dashboard_messages()
+    improvements = dashboard_improvements()
+    benchmarks = dashboard_benchmarks()
+    realtime = dashboard_realtime()
+
+    return {
+        "ok": True,
+        "campaigns": campaigns,
+        "approvals": approvals,
+        "agents": agents,
+        "messages": messages,
+        "improvements": improvements,
+        "benchmarks": benchmarks,
+        "realtime": realtime,
+    }
+
+
+# =========================
+# CENTRAL IA + AGENTES + LOGIN
+# =========================
+
+DATA_DIR = "data_local"
+AGENTS_FILE = f"{DATA_DIR}/agents.json"
+AI_DRAFTS_FILE = f"{DATA_DIR}/ai_drafts.json"
+ACCESS_LOG_FILE = f"{DATA_DIR}/access_log.json"
+
+
+def ensure_data_files():
+    import os
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+    for file_path in [AGENTS_FILE, AI_DRAFTS_FILE, ACCESS_LOG_FILE]:
+        if not os.path.exists(file_path):
+            with open(file_path, "w", encoding="utf-8") as file:
+                json.dump([], file, ensure_ascii=False, indent=2)
+
+
+def read_json_file(file_path: str):
+    ensure_data_files()
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except Exception:
+        return []
+
+
+def write_json_file(file_path: str, data):
+    ensure_data_files()
+    with open(file_path, "w", encoding="utf-8") as file:
+        json.dump(data, file, ensure_ascii=False, indent=2)
+
+
+class LoginEvent(BaseModel):
+    name: str
+    role: str = "usuario"
+
+
+class AgentCreate(BaseModel):
+    name: str
+    specialty: str
+    instructions: str
+    created_by: str = "Jaasiel"
+
+
+class AgentDecision(BaseModel):
+    agent_id: str
+    decision: str
+    reviewer: str = "Jaasiel"
+
+
+class CampaignAIDraftRequest(BaseModel):
+    objective: str
+    target_audience: str
+    offer: str
+    pain_points: str
+    tone: str = "consultivo, técnico e comercial"
+    agent_id: str = "gpedra_comercial"
+    created_by: str = "Jaasiel"
+
+
+class DraftDecision(BaseModel):
+    draft_id: str
+    decision: str
+    reviewer: str = "Jaasiel"
+
+
+def simple_ai_campaign_generation(payload: CampaignAIDraftRequest):
+    prompt = f"""
+Você é um agente comercial do Grupo Pedra.
+
+Crie uma campanha para Lemlist com:
+Objetivo: {payload.objective}
+Público-alvo: {payload.target_audience}
+Oferta: {payload.offer}
+Dores: {payload.pain_points}
+Tom: {payload.tone}
+
+Entregue em JSON com:
+campaign_name,
+strategy_summary,
+lead_filters,
+messages com 5 passos,
+recommended_agent,
+risk_notes,
+approval_notes.
+
+Não envie nada. Apenas gere o rascunho para aprovação humana.
+"""
+
+    if not OPENAI_API_KEY:
+        return {
+            "campaign_name": f"Campanha IA - {payload.target_audience}",
+            "strategy_summary": "Rascunho criado sem chamada OpenAI porque a chave não está configurada.",
+            "lead_filters": payload.target_audience,
+            "messages": [
+                {
+                    "step": 1,
+                    "channel": "LinkedIn",
+                    "message": "Mensagem inicial consultiva gerada como fallback."
+                },
+                {
+                    "step": 2,
+                    "channel": "Email",
+                    "message": "Mensagem de aprofundamento gerada como fallback."
+                }
+            ],
+            "recommended_agent": payload.agent_id,
+            "risk_notes": "Validar manualmente antes de enviar.",
+            "approval_notes": "Aguardando aprovação de Jaasiel."
+        }
+
+    try:
+        response = requests.post(
+            "https://api.openai.com/v1/responses",
+            headers={
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": OPENAI_MODEL,
+                "input": prompt,
+            },
+            timeout=60,
+        )
+
+        if response.status_code >= 400:
+            return {
+                "campaign_name": f"Campanha IA - {payload.target_audience}",
+                "strategy_summary": "Falha ao chamar OpenAI. Rascunho fallback criado.",
+                "error": response.text,
+                "messages": [],
+                "approval_notes": "Aguardando aprovação."
+            }
+
+        data = response.json()
+        output_text = ""
+
+        try:
+            output_text = data["output"][0]["content"][0]["text"]
+        except Exception:
+            output_text = json.dumps(data, ensure_ascii=False)
+
+        return {
+            "raw_ai_output": output_text,
+            "approval_notes": "Rascunho gerado pela IA. Revisar antes de aprovar."
+        }
+
+    except Exception as error:
+        return {
+            "campaign_name": f"Campanha IA - {payload.target_audience}",
+            "strategy_summary": "Erro local ao gerar campanha com IA.",
+            "error": str(error),
+            "messages": [],
+            "approval_notes": "Aguardando aprovação."
+        }
+
+
+@app.post("/auth/login")
+def auth_login(payload: LoginEvent):
+    logs = read_json_file(ACCESS_LOG_FILE)
+
+    item = {
+        "id": str(uuid.uuid4()),
+        "name": payload.name,
+        "role": payload.role,
+        "accessed_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    }
+
+    logs.append(item)
+    write_json_file(ACCESS_LOG_FILE, logs)
+
+    return {
+        "ok": True,
+        "message": "Acesso registrado.",
+        "access": item,
+    }
+
+
+@app.get("/auth/access-log")
+def auth_access_log():
+    logs = read_json_file(ACCESS_LOG_FILE)
+    return {
+        "ok": True,
+        "total": len(logs),
+        "logs": logs[-100:],
+    }
+
+
+@app.post("/ai-agents")
+def create_ai_agent(payload: AgentCreate):
+    agents = read_json_file(AGENTS_FILE)
+
+    item = {
+        "agent_id": str(uuid.uuid4()),
+        "name": payload.name,
+        "specialty": payload.specialty,
+        "instructions": payload.instructions,
+        "created_by": payload.created_by,
+        "status": "pending_approval",
+        "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "reviewed_by": None,
+        "reviewed_at": None,
+    }
+
+    agents.append(item)
+    write_json_file(AGENTS_FILE, agents)
+
+    return {
+        "ok": True,
+        "message": "Agente criado e aguardando aprovação.",
+        "agent": item,
+    }
+
+
+@app.get("/ai-agents")
+def list_ai_agents(status: Optional[str] = None):
+    agents = read_json_file(AGENTS_FILE)
+
+    if status:
+        agents = [a for a in agents if a.get("status") == status]
+
+    return {
+        "ok": True,
+        "total": len(agents),
+        "agents": agents,
+    }
+
+
+@app.post("/ai-agents/decision")
+def decide_ai_agent(payload: AgentDecision):
+    agents = read_json_file(AGENTS_FILE)
+
+    for agent in agents:
+        if agent.get("agent_id") == payload.agent_id:
+            if payload.decision == "approve":
+                agent["status"] = "approved"
+            elif payload.decision == "reject":
+                agent["status"] = "rejected"
+            else:
+                raise HTTPException(status_code=400, detail="decision deve ser approve ou reject")
+
+            agent["reviewed_by"] = payload.reviewer
+            agent["reviewed_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+            write_json_file(AGENTS_FILE, agents)
+
+            return {
+                "ok": True,
+                "agent": agent,
+            }
+
+    raise HTTPException(status_code=404, detail="Agente não encontrado")
+
+
+@app.post("/ai/campaign-drafts")
+def create_campaign_draft(payload: CampaignAIDraftRequest):
+    drafts = read_json_file(AI_DRAFTS_FILE)
+
+    ai_result = simple_ai_campaign_generation(payload)
+
+    item = {
+        "draft_id": str(uuid.uuid4()),
+        "type": "lemlist_campaign_draft",
+        "objective": payload.objective,
+        "target_audience": payload.target_audience,
+        "offer": payload.offer,
+        "pain_points": payload.pain_points,
+        "tone": payload.tone,
+        "agent_id": payload.agent_id,
+        "created_by": payload.created_by,
+        "status": "pending_approval",
+        "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "ai_result": ai_result,
+        "reviewed_by": None,
+        "reviewed_at": None,
+    }
+
+    drafts.append(item)
+    write_json_file(AI_DRAFTS_FILE, drafts)
+
+    return {
+        "ok": True,
+        "message": "Campanha gerada pela IA e aguardando aprovação antes de criar/enviar no Lemlist.",
+        "draft": item,
+    }
+
+
+@app.get("/ai/campaign-drafts")
+def list_campaign_drafts(status: Optional[str] = None):
+    drafts = read_json_file(AI_DRAFTS_FILE)
+
+    if status:
+        drafts = [d for d in drafts if d.get("status") == status]
+
+    return {
+        "ok": True,
+        "total": len(drafts),
+        "drafts": drafts,
+    }
+
+
+@app.post("/ai/campaign-drafts/decision")
+def decide_campaign_draft(payload: DraftDecision):
+    drafts = read_json_file(AI_DRAFTS_FILE)
+
+    for draft in drafts:
+        if draft.get("draft_id") == payload.draft_id:
+            if payload.decision == "approve":
+                draft["status"] = "approved_waiting_lemlist_creation"
+                draft["approval_note"] = "Aprovado. Próxima etapa: criar campanha no Lemlist via API ou manualmente."
+            elif payload.decision == "reject":
+                draft["status"] = "rejected"
+                draft["approval_note"] = "Rejeitado. Não enviar para Lemlist."
+            else:
+                raise HTTPException(status_code=400, detail="decision deve ser approve ou reject")
+
+            draft["reviewed_by"] = payload.reviewer
+            draft["reviewed_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+            write_json_file(AI_DRAFTS_FILE, drafts)
+
+            return {
+                "ok": True,
+                "draft": draft,
+            }
+
+    raise HTTPException(status_code=404, detail="Rascunho não encontrado")
+
+
+@app.get("/ai-control/overview")
+def ai_control_overview():
+    campaigns = list_lemlist_campaigns()
+    approvals = list_approvals(status="pending")
+
+    agents = read_json_file(AGENTS_FILE)
+    drafts = read_json_file(AI_DRAFTS_FILE)
+    access_logs = read_json_file(ACCESS_LOG_FILE)
+
+    pipedrive_deals = {}
+    pipedrive_activities = {}
+
+    try:
+        pipedrive_deals = dashboard_pipedrive_deals()
+    except Exception as error:
+        pipedrive_deals = {"ok": False, "error": str(error)}
+
+    try:
+        pipedrive_activities = dashboard_pipedrive_activities()
+    except Exception as error:
+        pipedrive_activities = {"ok": False, "error": str(error)}
+
+    return {
+        "ok": True,
+        "lemlist_campaigns": campaigns,
+        "pending_replies": approvals,
+        "agents": agents,
+        "campaign_drafts": drafts,
+        "access_logs": access_logs[-50:],
+        "pipedrive": {
+            "deals": pipedrive_deals,
+            "activities": pipedrive_activities,
+        },
+    }
+
+

@@ -1,0 +1,156 @@
+{
+  "ok": true,
+  "total": 18,
+  "campaigns": [
+    {
+      "_id": "cam_7bGKGsNNgEZrEG7r2",
+      "name": "Mateus's campaign (1)",
+      "sequenceId": "seq_WnkjpxbprkDFq4yL4",
+      "archived": true,
+      "createdAt": "2026-02-12T16:35:31.761Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "draft"
+    },
+    {
+      "_id": "cam_2Bguhq9mpRxkJEZiA",
+      "name": "Mateus's campaign (2)",
+      "sequenceId": "seq_ABLzEAZYSE3sDWQjF",
+      "archived": true,
+      "createdAt": "2026-02-23T19:27:23.764Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "draft"
+    },
+    {
+      "_id": "cam_FYgGXR9nMFrmvkn57",
+      "name": "Mateus's campaign (3)",
+      "sequenceId": "seq_9taLGTixvnag4gGQg",
+      "archived": true,
+      "createdAt": "2026-02-23T19:28:37.663Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "draft"
+    },
+    {
+      "_id": "cam_WR8cSASsNCYYeKAcv",
+      "name": "campanha 23/02 - Linkedin",
+      "sequenceId": "seq_rHaACB65CR3ZJz3GL",
+      "createdAt": "2026-02-23T19:30:02.251Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "running"
+    },
+    {
+      "_id": "cam_jpkjf5Q3JRKGfusHD",
+      "name": "campanha 09/03/2026 - gerentes e diretores",
+      "sequenceId": "seq_BWWovEC2TpRdBBuvb",
+      "createdAt": "2026-03-09T19:30:58.066Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "running"
+    },
+    {
+      "_id": "cam_T23DR8c8HjnGK7Dw7",
+      "name": "AI - Mateus’s Campaign",
+      "sequenceId": "seq_WD9o5NenNgzYZQdRn",
+      "archived": true,
+      "createdAt": "2026-03-30T19:34:47.935Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "draft"
+    },
+    {
+      "_id": "cam_f8pDPP2RyJuzFJkj3",
+      "name": "Mateus's campaign (4)",
+      "sequenceId": "seq_9hQL8PEkAYbFhgS2i",
+      "archived": true,
+      "createdAt": "2026-03-30T20:23:56.162Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "draft"
+    },
+    {
+      "_id": "cam_jqYLdK67SiCpcewzd",
+      "name": "Campanha 3",
+      "sequenceId": "seq_8TD5feAnqXqcNnzKL",
+      "archived": true,
+      "createdAt": "2026-03-30T20:28:31.406Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "draft"
+    },
+    {
+      "_id": "cam_sPqLaZQNcDTPGm4Kj",
+      "name": "CEO´s",
+      "sequenceId": "seq_nbkmqSxEaserMrk9D",
+      "createdAt": "2026-04-02T13:21:21.638Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "paused"
+    },
+    {
+      "_id": "cam_gm2HNGZi3GHF26zFW",
+      "name": "Gerentes e Diretores de Pós-vendas  SEGUIMOS",
+      "sequenceId": "seq_SNKznNPYnNEfdgkQH",
+      "createdAt": "2026-04-10T19:15:06.681Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "running"
+    },
+    {
+      "_id": "cam_nMwYQbLSLxfyFQ6kB",
+      "name": "Maquinas Amarelas",
+      "sequenceId": "seq_wABJCKSTa9LahdszG",
+      "createdAt": "2026-04-10T19:49:16.635Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "paused"
+    },
+    {
+      "_id": "cam_rFrBs9E9SNMgyDs6u",
+      "name": "Diretores",
+      "sequenceId": "seq_ibrFhnscKsw7HYrPu",
+      "createdAt": "2026-04-10T20:33:30.395Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "paused"
+    },
+    {
+      "_id": "cam_6vpgMXzZASNHTJ6f3",
+      "name": "Gerente de Novos Negocios",
+      "sequenceId": "seq_P9Kq3vXJWkxsjpvud",
+      "createdAt": "2026-04-10T20:43:26.142Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "paused"
+    },
+    {
+      "_id": "cam_QLmmJ53GZmBdBp2q7",
+      "name": "gerentes, coordenadores de pós vendas",
+      "sequenceId": "seq_93J7sTNxdbqRiZyRB",
+      "createdAt": "2026-04-13T19:10:04.539Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "running"
+    },
+    {
+      "_id": "cam_iiyT3Kz9kEuPYnmCR",
+      "name": "compras e suprimentos",
+      "sequenceId": "seq_cY8ebrP3nbefBGj4r",
+      "createdAt": "2026-04-14T20:48:15.408Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "running"
+    },
+    {
+      "_id": "cam_fKziZ6okn9SywnR6p",
+      "name": "Gerentes de Pós-Vendas — Sofia 14D 🎯",
+      "sequenceId": "seq_4ERKN5ZE6CqPZMRfC",
+      "createdAt": "2026-04-23T19:26:37.62Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "running"
+    },
+    {
+      "_id": "cam_fvsdo3iaQEFefr46A",
+      "name": "Gerentes de Pós-Vendas — Sofia 14D v2 🎯",
+      "sequenceId": "seq_7PAR8baRu5As9Bpts",
+      "createdAt": "2026-04-23T20:05:28.423Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "paused"
+    },
+    {
+      "_id": "cam_kmwkLzuJKb2r2T7Zx",
+      "name": "Gerentes Pós-Vendas — PEDRA v3 🏆",
+      "sequenceId": "seq_vcrBB4JHcsrEbZSvp",
+      "createdAt": "2026-04-28T20:04:01.444Z",
+      "createdBy": "usr_e2JL8JRk84yfpQnjj",
+      "status": "running"
+    }
+  ]
+}

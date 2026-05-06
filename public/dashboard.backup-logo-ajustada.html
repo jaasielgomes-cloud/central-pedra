@@ -1,0 +1,2241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Central Comercial Grupo Pedra</title>
+
+  <style>
+    :root {
+      --preto: #0b0b0d;
+      --grafite: #18181b;
+      --cinza: #52525b;
+      --cinza-claro: #f4f4f5;
+      --branco: #ffffff;
+      --vermelho: #c1121f;
+      --vermelho-vivo: #ef233c;
+      --verde: #16a34a;
+      --amarelo: #ca8a04;
+      --azul: #2563eb;
+      --borda: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--cinza-claro);
+      color: var(--preto);
+    }
+
+    header {
+      background: linear-gradient(135deg, #050505, #202024);
+      color: var(--branco);
+      padding: 24px 32px;
+      border-bottom: 5px solid var(--vermelho);
+    }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand-logo {
+      width: 128px;
+      max-height: 58px;
+      object-fit: contain;
+      background: transparent;
+      border: none;
+      display: block;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -0.4px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      color: #d4d4d8;
+      font-size: 15px;
+    }
+
+    main {
+      max-width: 1540px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .muted {
+      color: #71717a;
+      font-size: 14px;
+    }
+
+    .btn {
+      border: 0;
+      background: var(--vermelho);
+      color: var(--branco);
+      padding: 11px 15px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .btn:hover {
+      background: var(--vermelho-vivo);
+    }
+
+    .btn.secondary {
+      background: var(--preto);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--borda);
+      background: var(--branco);
+      padding: 11px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.15s;
+    }
+
+    .tab-btn.active {
+      background: var(--preto);
+      color: var(--branco);
+      border-color: var(--vermelho);
+      box-shadow: 0 8px 18px rgba(193, 18, 31, 0.22);
+    }
+
+    .tab { display: none; }
+    .tab.active { display: block; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .card,
+    .panel {
+      background: var(--branco);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 10px 24px rgba(15, 15, 16, 0.08);
+      border: 1px solid var(--borda);
+    }
+
+    .card.dark {
+      background: var(--preto);
+      color: var(--branco);
+      border-bottom: 5px solid var(--vermelho);
+    }
+
+    .card h3 {
+      margin: 0;
+      color: #71717a;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .card.dark h3 { color: #d4d4d8; }
+
+    .number {
+      font-size: 34px;
+      font-weight: 900;
+      margin-top: 8px;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .status-ok,
+    .status-running,
+    .status-excelente,
+    .status-acima {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-atencao,
+    .status-pending,
+    .status-media {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .status-draft,
+    .status-pendente {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .status-critico,
+    .status-abaixo,
+    .status-rejected {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .table-wrap { overflow: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 920px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--borda);
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #fafafa;
+      color: #52525b;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    tr:hover {
+      background: #fff1f2;
+      cursor: pointer;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--borda);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+
+    textarea { min-height: 110px; }
+
+    .insight {
+      border-left: 5px solid var(--vermelho);
+      padding: 14px;
+      background: #fafafa;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .bar-row { margin-bottom: 14px; }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .bar-bg {
+      height: 14px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--vermelho), var(--preto));
+      min-width: 4px;
+    }
+
+    .bar-fill.green {
+      background: linear-gradient(90deg, var(--verde), #14532d);
+    }
+
+    .bar-fill.yellow {
+      background: linear-gradient(90deg, var(--amarelo), #713f12);
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: -520px;
+      width: 500px;
+      max-width: 92vw;
+      height: 100vh;
+      background: var(--branco);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.2);
+      padding: 24px;
+      transition: 0.2s;
+      z-index: 99;
+      overflow: auto;
+      border-left: 5px solid var(--vermelho);
+    }
+
+    .drawer.open { right: 0; }
+
+    .drawer-close {
+      float: right;
+      background: var(--preto);
+      color: var(--branco);
+      border: 0;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      background: #111;
+      color: #f4f4f5;
+      padding: 12px;
+      border-radius: 12px;
+      overflow: auto;
+      font-size: 12px;
+    }
+
+
+
+    .kpi-demo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-chart-card {
+      background: var(--branco);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(15, 15, 16, 0.08);
+      border: 1px solid var(--borda);
+      min-height: 230px;
+    }
+
+    .kpi-chart-card h3 {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: var(--preto);
+    }
+
+    .mini-chart {
+      display: flex;
+      align-items: end;
+      gap: 10px;
+      height: 120px;
+      padding-top: 10px;
+      border-bottom: 1px solid var(--borda);
+    }
+
+    .mini-bar-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: end;
+      height: 100%;
+      gap: 6px;
+    }
+
+    .mini-bar {
+      width: 100%;
+      max-width: 34px;
+      border-radius: 10px 10px 0 0;
+      background: linear-gradient(180deg, var(--vermelho), var(--preto));
+      min-height: 4px;
+    }
+
+    .mini-bar.green {
+      background: linear-gradient(180deg, var(--verde), #14532d);
+    }
+
+    .mini-bar.yellow {
+      background: linear-gradient(180deg, var(--amarelo), #713f12);
+    }
+
+    .mini-bar.blue {
+      background: linear-gradient(180deg, var(--azul), #1e3a8a);
+    }
+
+    .mini-label {
+      font-size: 11px;
+      color: #71717a;
+      text-align: center;
+      min-height: 26px;
+    }
+
+    .donut {
+      width: 118px;
+      height: 118px;
+      border-radius: 50%;
+      margin: 8px auto 12px;
+      background: conic-gradient(var(--vermelho) 0deg, var(--vermelho) 120deg, #e5e7eb 120deg, #e5e7eb 360deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .donut::after {
+      content: "";
+      width: 76px;
+      height: 76px;
+      background: var(--branco);
+      border-radius: 50%;
+      position: absolute;
+    }
+
+    .donut span {
+      position: relative;
+      z-index: 2;
+      font-weight: 900;
+      font-size: 20px;
+      color: var(--preto);
+    }
+
+    .chart-note {
+      font-size: 12px;
+      color: #71717a;
+      line-height: 1.4;
+    }
+
+    .kpi-status-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .kpi-status-line strong {
+      color: var(--preto);
+    }
+
+
+    @media (max-width: 950px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      main { padding: 14px; }
+      .grid { grid-template-columns: 1fr; }
+      header { padding: 22px; }
+      .brand-header { flex-direction: column; align-items: flex-start; }
+      .brand-logo { width: 118px; max-height: 54px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand-header">
+      <img src="/public/logo-grupo-pedra.png" alt="Grupo Pedra" class="brand-logo" />
+      <div>
+        <h1>Central Comercial Grupo Pedra</h1>
+        <p>Lemlist, Pipedrive, agentes especialistas, mercado, aprovações e controle comercial.</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div>
+        <strong>Centro de comando comercial</strong>
+        <div class="muted">Comparação entre campanhas, CRM e dados de mercado. Nada é enviado sem aprovação humana.</div>
+      </div>
+      <button class="btn" onclick="loadAll()">Atualizar central</button>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="geral">Geral</button>
+      <button class="tab-btn" data-tab="lemlist">Lemlist</button>
+      <button class="tab-btn" data-tab="pipedrive">Pipedrive</button>
+      <button class="tab-btn" data-tab="pipedriveInteligente">Organização do Pipedrive</button>
+      <button class="tab-btn" data-tab="comparativo">Comparativo Comercial com Mercado</button>
+      <button class="tab-btn" data-tab="mercado">Referências de Mercado</button>
+      <button class="tab-btn" data-tab="agentes">Central de Agentes Especialistas especialistas</button>
+      <button class="tab-btn" data-tab="criarAgente">Criar Agentes Especialistas especialistas</button>
+      <button class="tab-btn" data-tab="criarCampanha">Criar Campanha com Agentes</button>
+      <button class="tab-btn" data-tab="aprovacoes">Aprovações</button>
+      <button class="tab-btn" data-tab="acessos">Login e Acessos</button>
+    </nav>
+
+    <section id="geral" class="tab active">
+      <div class="grid">
+        <div class="card dark"><h3>Campanhas Lemlist</h3><div id="kpiCampaigns" class="number">-</div></div>
+        <div class="card"><h3>Campanhas ativas</h3><div id="kpiRunning" class="number">-</div></div>
+        <div class="card"><h3>Negócios Pipedrive</h3><div id="kpiDeals" class="number">-</div></div>
+        <div class="card"><h3>Aprovações pendentes</h3><div id="kpiApprovals" class="number">-</div></div>
+      </div>
+
+
+
+      <div class="panel">
+        <h2>Demonstração visual dos KPIs</h2>
+        <p class="muted">Gráficos demonstrativos para leitura rápida dos indicadores comerciais.</p>
+
+        <div class="kpi-demo-grid">
+          <div class="kpi-chart-card">
+            <h3>Lemlist por status</h3>
+            <div id="chartLemlistStatus" class="mini-chart"></div>
+            <p class="chart-note">Mostra a distribuição entre campanhas em andamento, pausadas, rascunhos e arquivadas.</p>
+          </div>
+
+          <div class="kpi-chart-card">
+            <h3>Saúde do Pipedrive</h3>
+            <div id="chartPipedriveHealth"></div>
+            <p class="chart-note">Demonstra o peso dos negócios sem próxima ação em relação aos negócios abertos.</p>
+          </div>
+
+          <div class="kpi-chart-card">
+            <h3>Comparativo com mercado</h3>
+            <div id="chartMarketComparison" class="mini-chart"></div>
+            <p class="chart-note">Compara referências comerciais configuradas com os resultados disponíveis.</p>
+          </div>
+
+          <div class="kpi-chart-card">
+            <h3>Aprovações</h3>
+            <div id="chartApprovals" class="mini-chart"></div>
+            <p class="chart-note">Mostra agentes e campanhas aguardando decisão humana.</p>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Resumo executivo</h2>
+          <div id="summaryBox">Carregando...</div>
+        </div>
+        <div class="panel">
+          <h2>Prioridades do momento</h2>
+          <div id="priorityBox">Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="lemlist" class="tab">
+      <div class="grid">
+        <div class="card dark"><h3>Total</h3><div id="lemTotal" class="number">-</div></div>
+        <div class="card"><h3>Em andamento</h3><div id="lemRunning" class="number">-</div></div>
+        <div class="card"><h3>Pausadas</h3><div id="lemPaused" class="number">-</div></div>
+        <div class="card"><h3>Rascunhos</h3><div id="lemDraft" class="number">-</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h2>KPIs Lemlist x Mercado</h2>
+          <div id="lemlistMarketBox">Carregando...</div>
+        </div>
+        <div class="panel">
+          <h2>Distribuição das campanhas</h2>
+          <div id="lemlistBars">Carregando...</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Campanhas Lemlist</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Campanha</th>
+                <th>Status</th>
+                <th>Prioridade</th>
+                <th>Prioridade comercial</th>
+                <th>Recomendação</th>
+              </tr>
+            </thead>
+            <tbody id="lemlistTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="pipedrive" class="tab">
+      <div class="grid">
+        <div class="card dark"><h3>Total de negócios</h3><div id="pipeTotal" class="number">-</div></div>
+        <div class="card"><h3>Negócios abertos</h3><div id="pipeOpen" class="number">-</div></div>
+        <div class="card"><h3>Atividades</h3><div id="pipeActivities" class="number">-</div></div>
+        <div class="card"><h3>Sem próxima ação</h3><div id="pipeNoAction" class="number">-</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h2>KPIs Pipedrive x Mercado</h2>
+          <div id="pipedriveMarketBox">Carregando...</div>
+        </div>
+        <div class="panel">
+          <h2>Leitura comercial do CRM</h2>
+          <div id="pipedriveInsightBox">Carregando...</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Negócios do Pipedrive</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Negócio</th>
+                <th>Valor</th>
+                <th>Status</th>
+                <th>Etapa</th>
+                <th>Criado em</th>
+              </tr>
+            </thead>
+            <tbody id="dealsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+
+    <section id="pipedriveInteligente" class="tab">
+      <div class="grid">
+        <div class="card dark"><h3>Negócios abertos</h3><div id="smartOpenDeals" class="number">-</div></div>
+        <div class="card"><h3>Sem próxima ação</h3><div id="smartNoAction" class="number">-</div></div>
+        <div class="card"><h3>Sem valor estimado</h3><div id="smartNoValue" class="number">-</div></div>
+        <div class="card"><h3>Ações sugeridas</h3><div id="smartActions" class="number">-</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Análise de oportunidades de melhoria no Pipedrive</h2>
+          <p class="muted">Os agentes analisam oportunidades de melhoria comerciais e sugerem ações. Nada é alterado no Pipedrive sem aprovação.</p>
+          <button class="btn" onclick="analyzePipedrive()">Analisar oportunidades de melhoria</button>
+          <div id="smartSummaryBox" style="margin-top: 14px;">Aguardando análise.</div>
+        </div>
+
+        <div class="panel">
+          <h2>Como os agentes atuam</h2>
+          <div class="insight"><strong>GPedra Comercial:</strong> identifica oportunidade parada, falta de valor e necessidade de avanço comercial.</div>
+          <div class="insight"><strong>SDR Agent:</strong> sugere follow-up, ligação, tarefa e cadência.</div>
+          <div class="insight"><strong>GPedra Engenharia:</strong> alerta quando a oportunidade precisa de validação técnica.</div>
+          <div class="insight"><strong>GMarket:</strong> sugere melhoria de abordagem quando a origem for campanha.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Ações sugeridas aguardando autorização</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Negócio</th>
+                <th>Problema</th>
+                <th>Agente</th>
+                <th>Recomendação</th>
+                <th>Status</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="smartActionsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <section id="comparativo" class="tab">
+      <div class="grid-3">
+        <div class="panel">
+          <h2>Lemlist x Mercado</h2>
+          <div id="compareLemlist">Carregando...</div>
+        </div>
+        <div class="panel">
+          <h2>Pipedrive x Mercado</h2>
+          <div id="comparePipedrive">Carregando...</div>
+        </div>
+        <div class="panel">
+          <h2>Lemlist x Pipedrive</h2>
+          <div id="crossAnalysis">Carregando...</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Ranking de campanhas por prioridade comercial</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Campanha</th>
+                <th>Status</th>
+                <th>Prioridade</th>
+                <th>Prioridade comercial</th>
+                <th>Agente responsável</th>
+                <th>Recomendação</th>
+              </tr>
+            </thead>
+            <tbody id="rankingTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="mercado" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Benchmarks configurados</h2>
+          <div id="benchmarksBox">Carregando...</div>
+        </div>
+        <div class="panel">
+          <h2>Atualizar dados de mercado</h2>
+          <p class="muted">Use essa área para ajustar as referências de mercado por nicho, público ou campanha.</p>
+
+          <label>Taxa média de resposta Lemlist (%)</label>
+          <input id="benchReply" type="number" value="8" />
+
+          <label>Taxa média de reunião Lemlist (%)</label>
+          <input id="benchMeeting" type="number" value="1.5" />
+
+          <label>Conversão oportunidade → venda no Pipedrive (%)</label>
+          <input id="benchWin" type="number" value="20" />
+
+          <label>Ticket médio esperado</label>
+          <input id="benchTicket" type="number" value="150000" />
+
+          <label>Percentual máximo de negócios sem próxima ação (%)</label>
+          <input id="benchNoAction" type="number" value="5" />
+
+          <button class="btn" onclick="saveBenchmarks()">Salvar referências</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="agentes" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Mesa de agentes especialistas</h2>
+
+          <label>Nome da campanha</label>
+          <input id="roundCampaign" placeholder="Ex: Gerentes Pós-Vendas — PEDRA v3" />
+
+          <label>Objetivo</label>
+          <textarea id="roundObjective" placeholder="Ex: gerar reuniões com gerentes de pós-venda."></textarea>
+
+          <label>Público-alvo</label>
+          <input id="roundAudience" placeholder="Ex: gerentes e diretores de pós-venda" />
+
+          <label>Dores do público</label>
+          <textarea id="roundPain" placeholder="Ex: oficina travada, layout ruim, troca de óleo ineficiente."></textarea>
+
+          <label>Mensagem atual</label>
+          <textarea id="roundMessage" placeholder="Mensagem que será analisada pelos agentes."></textarea>
+
+          <button class="btn" onclick="runRoundtable()">Rodar conversa entre agentes</button>
+        </div>
+        <div class="panel">
+          <h2>Resultado da conversa</h2>
+          <div id="roundtableResult">Aguardando análise.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="criarAgente" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Criar novo agente especialista</h2>
+
+          <label>Nome do agente</label>
+          <input id="agentName" placeholder="Ex: Agente Pós-Venda Volvo" />
+
+          <label>Especialidade</label>
+          <input id="agentSpecialty" placeholder="Ex: infraestrutura de pós-venda" />
+
+          <label>Instruções do agente</label>
+          <textarea id="agentInstructions" placeholder="Explique como esse agente deve analisar leads, campanhas e respostas."></textarea>
+
+          <button class="btn" onclick="createAgent()">Criar agente para aprovação</button>
+        </div>
+        <div class="panel">
+          <h2>Agentes especialistas cadastrados</h2>
+          <div id="agentsBox">Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="criarCampanha" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Gerar nova campanha para aprovação</h2>
+
+          <label>Objetivo da campanha</label>
+          <textarea id="campaignObjective" placeholder="Ex: gerar reuniões com gerentes de pós-venda."></textarea>
+
+          <label>Público-alvo</label>
+          <input id="campaignAudience" placeholder="Ex: gerentes e diretores de pós-venda" />
+
+          <label>Oferta</label>
+          <input id="campaignOffer" placeholder="Ex: diagnóstico técnico da infraestrutura de pós-venda" />
+
+          <label>Dores principais</label>
+          <textarea id="campaignPain" placeholder="Ex: gargalos operacionais, troca de óleo ineficiente, layout ruim."></textarea>
+
+          <label>Agente responsável</label>
+          <select id="campaignAgent"></select>
+
+          <button class="btn" onclick="createCampaignDraft()">Gerar campanha para aprovação</button>
+        </div>
+        <div class="panel">
+          <h2>Campanhas criadas aguardando decisão</h2>
+          <div id="campaignDraftsBox">Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="aprovacoes" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Agentes especialistas aguardando aprovação</h2>
+          <div id="pendingAgentsBox">Carregando...</div>
+        </div>
+        <div class="panel">
+          <h2>Campanhas aguardando aprovação</h2>
+          <div id="pendingDraftsBox">Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="acessos" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Registrar acesso</h2>
+          <label>Quem acessou?</label>
+          <select id="loginName">
+            <option value="Jaasiel Gomes">Jaasiel Gomes</option>
+            <option value="Davi Vilela">Davi Vilela</option>
+            <option value="Estagiário">Estagiário</option>
+          </select>
+
+          <label>Perfil</label>
+          <select id="loginRole">
+            <option value="gestor">Gestor</option>
+            <option value="marketing_comercial">Marketing/Comercial</option>
+            <option value="estagiario">Estagiário</option>
+          </select>
+
+          <button class="btn" onclick="registerLogin()">Registrar entrada</button>
+        </div>
+
+        <div class="panel">
+          <h2>Histórico de acessos</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Nome</th><th>Perfil</th><th>Data/Hora</th></tr>
+              </thead>
+              <tbody id="accessLogTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside id="drawer" class="drawer">
+    <button class="drawer-close" onclick="closeDrawer()">Fechar</button>
+    <div id="drawerContent"></div>
+  </aside>
+
+  <script>
+    let state = {
+      comparison: null,
+      overview: null,
+      campaigns: [],
+      agents: [],
+      drafts: [],
+      accessLogs: [],
+      deals: [],
+      activities: []
+    };
+
+
+
+    function textoExecutivo(valor) {
+      const mapa = {
+        "pending_approval": "Aguardando aprovação",
+        "approved_executed": "Autorizado e executado",
+        "approved": "Aprovado",
+        "rejected": "Rejeitado",
+        "approved_waiting_lemlist_creation": "Aprovado para criação",
+        "create_activity": "Criar atividade de follow-up",
+        "add_note": "Adicionar nota no negócio",
+        "update_deal": "Atualizar negócio",
+        "open": "Aberto",
+        "won": "Ganho",
+        "lost": "Perdido",
+        "running": "Em andamento",
+        "paused": "Pausada",
+        "draft": "Rascunho",
+        "deal_id": "Negócio",
+        "dados da ação": "Dados da ação",
+        "execution_result": "Resultado da execução",
+        "source": "Origem",
+        "status": "Status",
+        "agent": "Agente responsável",
+        "recommendation": "Recomendação",
+        "problem": "Problema identificado",
+        "created_at": "Criado em",
+        "reviewed_by": "Revisado por",
+        "reviewed_at": "Revisado em"
+      };
+
+      if (valor === null || valor === undefined) return "-";
+
+      const texto = String(valor);
+      return mapa[texto] || texto;
+    }
+
+    function formatarObjetoExecutivo(obj) {
+      if (!obj || typeof obj !== "object") return escapeHtml(textoExecutivo(obj));
+
+      const linhas = [];
+
+      Object.entries(obj).forEach(([chave, valor]) => {
+        if (["api_token", "OPENAI_API_KEY", "PIPEDRIVE_API_KEY", "LEMLIST_API_KEY"].includes(chave)) return;
+
+        const chaveBonita = textoExecutivo(chave);
+
+        if (typeof valor === "object" && valor !== null) {
+          linhas.push(`<div class="insight"><strong>${escapeHtml(chaveBonita)}</strong><br>${formatarObjetoExecutivo(valor)}</div>`);
+        } else {
+          linhas.push(`<p><strong>${escapeHtml(chaveBonita)}:</strong> ${escapeHtml(textoExecutivo(valor))}</p>`);
+        }
+      });
+
+      return linhas.join("");
+    }
+
+    function abrirDetalhesExecutivo(titulo, objeto) {
+      openDrawer(titulo, formatarObjetoExecutivo(objeto));
+    }
+
+
+    function setupTabs() {
+      document.querySelectorAll(".tab-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          const tabId = button.getAttribute("data-tab");
+          document.querySelectorAll(".tab-btn").forEach(item => item.classList.remove("active"));
+          document.querySelectorAll(".tab").forEach(item => item.classList.remove("active"));
+          button.classList.add("active");
+          document.getElementById(tabId).classList.add("active");
+        });
+      });
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, options);
+      return await response.json();
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function fmtDate(value) {
+      if (!value) return "-";
+      try { return new Date(value).toLocaleString("pt-BR"); } catch { return value; }
+    }
+
+    function statusClass(status) {
+      const s = String(status || "").toLowerCase();
+      if (s.includes("excelente") || s.includes("acima") || s.includes("ok") || s.includes("running") || s.includes("approved")) return "status-running";
+      if (s.includes("atenção") || s.includes("pendente") || s.includes("média") || s.includes("paused")) return "status-pending";
+      if (s.includes("crítico") || s.includes("abaixo") || s.includes("rejected") || s.includes("lost")) return "status-rejected";
+      return "status-draft";
+    }
+
+    function badge(status) {
+      const map = {
+        running: "Em andamento",
+        paused: "Pausada",
+        draft: "Rascunho",
+        open: "Aberto",
+        won: "Ganho",
+        lost: "Perdido",
+        pending_approval: "Aguardando aprovação",
+        approved: "Aprovado",
+        approved_waiting_lemlist_creation: "Aprovado para criação",
+        rejected: "Rejeitado"
+      };
+      return `<span class="badge ${statusClass(status)}">${map[status] || status || "-"}</span>`;
+    }
+
+    function openDrawer(title, content) {
+      document.getElementById("drawerContent").innerHTML = `<h2>${escapeHtml(title)}</h2>${content}`;
+      document.getElementById("drawer").classList.add("open");
+    }
+
+    function closeDrawer() {
+      document.getElementById("drawer").classList.remove("open");
+    }
+
+    function bar(label, value, max, color = "") {
+      const number = Number(value || 0);
+      const width = Math.max(4, Math.min(100, max ? (number / max) * 100 : 0));
+      return `
+        <div class="bar-row">
+          <div class="bar-label"><span>${escapeHtml(label)}</span><span>${number}</span></div>
+          <div class="bar-bg"><div class="bar-fill ${color}" style="width:${width}%"></div></div>
+        </div>
+      `;
+    }
+
+    function comparisonLine(title, item, agent) {
+      if (!item) return "";
+      return `
+        <div class="insight">
+          <strong>${escapeHtml(title)}</strong><br>
+          Resultado atual: ${item.current === null ? "pendente de integração" : item.current}<br>
+          Referência de mercado: ${item.benchmark ?? "-"}<br>
+          Diferença: ${item.difference === null ? "-" : item.difference}<br>
+          Status: ${badge(item.status)}<br>
+          Recomendação: ${escapeHtml(item.recommendation)}<br>
+          Agente responsável: ${escapeHtml(agent)}
+        </div>
+      `;
+    }
+
+    async function loadAll() {
+      try {
+        const comparison = await fetchJson("/commercial/comparison");
+        const overview = await fetchJson("/ai-control/overview");
+
+        state.comparison = comparison;
+        state.overview = overview;
+        state.campaigns = comparison.lemlist?.campaigns_ranked || [];
+        state.agents = overview.agents || [];
+        state.drafts = overview.campaign_drafts || [];
+        state.accessLogs = overview.access_logs || [];
+        state.deals = comparison.pipedrive?.deals_sample || [];
+        state.activities = comparison.pipedrive?.activities_sample || [];
+
+        renderAll();
+      } catch (error) {
+        openDrawer("Erro ao carregar dashboard", `<p>${escapeHtml(error)}</p>`);
+      }
+    }
+
+    function renderAll() {
+      renderGeneral();
+      renderKpiCharts();
+      renderLemlist();
+      renderPipedrive();
+      renderComparison();
+      renderBenchmarks();
+      renderAgents();
+      renderCampaignDrafts();
+      renderApprovals();
+      renderAccessLogs();
+      fillAgentSelect();
+    }
+
+
+
+    function miniBars(targetId, items) {
+      const max = Math.max(...items.map(item => Number(item.value || 0)), 1);
+
+      document.getElementById(targetId).innerHTML = items.map(item => {
+        const height = Math.max(4, Math.round((Number(item.value || 0) / max) * 100));
+        return `
+          <div class="mini-bar-wrap">
+            <div class="mini-bar ${item.color || ""}" style="height:${height}%"></div>
+            <div class="mini-label">${escapeHtml(item.label)}<br><strong>${item.value}</strong></div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function donutChart(targetId, percent, centerText, noteLines = []) {
+      const safePercent = Math.max(0, Math.min(100, Number(percent || 0)));
+      const degrees = Math.round((safePercent / 100) * 360);
+
+      document.getElementById(targetId).innerHTML = `
+        <div class="donut" style="background: conic-gradient(var(--vermelho) 0deg, var(--vermelho) ${degrees}deg, #e5e7eb ${degrees}deg, #e5e7eb 360deg);">
+          <span>${centerText}</span>
+        </div>
+        ${noteLines.map(line => `<div class="kpi-status-line">${line}</div>`).join("")}
+      `;
+    }
+
+    function renderKpiCharts() {
+      if (!state.comparison) return;
+
+      const lem = state.comparison.lemlist.metrics || {};
+      const pipe = state.comparison.pipedrive.metrics || {};
+      const b = state.comparison.benchmarks || {};
+
+      miniBars("chartLemlistStatus", [
+        { label: "Andamento", value: lem.running_campaigns || 0, color: "green" },
+        { label: "Pausadas", value: lem.paused_campaigns || 0, color: "yellow" },
+        { label: "Rascunhos", value: lem.draft_campaigns || 0, color: "blue" },
+        { label: "Arquivadas", value: lem.archived_campaigns || 0, color: "" }
+      ]);
+
+      const openDeals = Number(pipe.open_deals || 0);
+      const noAction = Number(pipe.deals_without_next_activity || 0);
+      const noActionRate = openDeals > 0 ? Math.round((noAction / openDeals) * 100) : 0;
+
+      donutChart("chartPipedriveHealth", noActionRate, `${noActionRate}%`, [
+        `<span>Negócios abertos</span><strong>${openDeals}</strong>`,
+        `<span>Sem próxima ação</span><strong>${noAction}</strong>`
+      ]);
+
+      miniBars("chartMarketComparison", [
+        { label: "Resp. mercado", value: b.lemlist_reply_rate || 0, color: "yellow" },
+        { label: "Reunião mercado", value: b.lemlist_meeting_rate || 0, color: "blue" },
+        { label: "Venda CRM", value: b.pipedrive_opportunity_to_win_rate || 0, color: "green" },
+        { label: "Sem ação ideal", value: b.pipedrive_max_overdue_activity_rate || 0, color: "" }
+      ]);
+
+      const pendingAgents = state.agents.filter(a => a.status === "pending_approval").length;
+      const pendingDrafts = state.drafts.filter(d => d.status === "pending_approval").length;
+      const approvedAgents = state.agents.filter(a => a.status === "approved").length;
+      const approvedDrafts = state.drafts.filter(d => d.status === "approved_waiting_lemlist_creation").length;
+
+      miniBars("chartApprovals", [
+        { label: "Agentes especialistas pend.", value: pendingAgents, color: "yellow" },
+        { label: "Camp. pend.", value: pendingDrafts, color: "" },
+        { label: "Agentes especialistas aprov.", value: approvedAgents, color: "green" },
+        { label: "Camp. aprov.", value: approvedDrafts, color: "blue" }
+      ]);
+    }
+
+
+
+
+    async function loadPipedriveIntelligence() {
+      try {
+        const data = await fetchJson("/pipedrive-intelligence/overview");
+        const summary = data.analysis?.summary || {};
+        const latest = data.actions?.latest || [];
+
+        document.getElementById("smartOpenDeals").innerText = summary.open_deals ?? "-";
+        document.getElementById("smartNoAction").innerText = summary.deals_without_next_activity ?? "-";
+        document.getElementById("smartNoValue").innerText = summary.deals_without_value ?? "-";
+        document.getElementById("smartActions").innerText = data.actions?.pending ?? "-";
+
+        document.getElementById("smartSummaryBox").innerHTML = `
+          <div class="insight">Negócios abertos analisados: <strong>${summary.open_deals || 0}</strong></div>
+          <div class="insight">Negócios sem próxima ação: <strong>${summary.deals_without_next_activity || 0}</strong></div>
+          <div class="insight">Negócios sem valor estimado: <strong>${summary.deals_without_value || 0}</strong></div>
+          <div class="insight">Ações sugeridas nesta análise: <strong>${summary.suggested_actions || 0}</strong></div>
+        `;
+
+        const pending = latest.filter(item => item.status === "pending_approval").slice().reverse();
+
+        document.getElementById("smartActionsTable").innerHTML = pending.length ? pending.map(action => `
+          <tr>
+            <td><strong>${escapeHtml(action.deal_title || "-")}</strong></td>
+            <td>${escapeHtml(textoExecutivo(action.problem || "-"))}</td>
+            <td>${escapeHtml(textoExecutivo(action.agent || "-"))}</td>
+            <td>${escapeHtml(textoExecutivo(action.recommendation || "-"))}</td>
+            <td>${badge(textoExecutivo(action.status))}</td>
+            <td>
+              <button class="btn" onclick="decidePipedriveAction('${action.action_id}', 'approve')">Autorizar</button>
+              <button class="btn secondary" onclick="decidePipedriveAction('${action.action_id}', 'reject')">Rejeitar</button>
+            </td>
+          </tr>
+        `).join("") : `<tr><td colspan="6">Nenhuma ação pendente no momento. Clique em analisar oportunidades de melhoria agora.</td></tr>`;
+
+      } catch (error) {
+        document.getElementById("smartSummaryBox").innerHTML = `<div class="insight">Erro ao carregar análise: ${escapeHtml(error)}</div>`;
+      }
+    }
+
+    async function analyzePipedrive() {
+      const result = await fetchJson("/pipedrive-intelligence/analyze", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"}
+      });
+
+      openDrawer("Análise do Pipedrive concluída", `<pre>${escapeHtml(detalhes.stringify(result, null, 2))}</pre>`);
+      await loadPipedriveIntelligence();
+    }
+
+    async function decidePipedriveAction(actionId, decision) {
+      const result = await fetchJson("/pipedrive-intelligence/actions/decision", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: detalhes.stringify({
+          action_id: actionId,
+          decision: decision,
+          reviewer: "Jaasiel"
+        })
+      });
+
+      openDrawer("Decisão aplicada", `<pre>${escapeHtml(detalhes.stringify(result, null, 2))}</pre>`);
+      await loadPipedriveIntelligence();
+      await loadAll();
+    }
+
+
+    function renderGeneral() {
+      const lem = state.comparison.lemlist.metrics;
+      const pipe = state.comparison.pipedrive.metrics;
+
+      document.getElementById("kpiCampaigns").innerText = lem.total_campaigns;
+      document.getElementById("kpiRunning").innerText = lem.running_campaigns;
+      document.getElementById("kpiDeals").innerText = pipe.total_deals;
+      document.getElementById("kpiApprovals").innerText =
+        state.drafts.filter(d => d.status === "pending_approval").length +
+        state.agents.filter(a => a.status === "pending_approval").length;
+
+      document.getElementById("summaryBox").innerHTML = `
+        <div class="insight">O Lemlist possui <strong>${lem.total_campaigns}</strong> campanhas, sendo <strong>${lem.running_campaigns}</strong> em andamento.</div>
+        <div class="insight">O Pipedrive possui <strong>${pipe.total_deals}</strong> negócios, com <strong>${pipe.open_deals}</strong> abertos.</div>
+        <div class="insight">Existem <strong>${pipe.deals_without_next_activity}</strong> negócios sem próxima ação registrada.</div>
+        <div class="insight">O foco do painel é medir o caminho: resposta → oportunidade → reunião → proposta → venda.</div>
+      `;
+
+      document.getElementById("priorityBox").innerHTML = `
+        <div class="insight">1. Revisar campanhas ativas com baixa prioridade comercial.</div>
+        <div class="insight">2. Criar próxima atividade para negócios sem follow-up no Pipedrive.</div>
+        <div class="insight">3. Vincular campanhas Lemlist aos negócios criados no Pipedrive para análise cruzada real.</div>
+      `;
+    }
+
+    function renderLemlist() {
+      const lem = state.comparison.lemlist.metrics;
+      const comp = state.comparison.lemlist.market_comparison;
+      const max = Math.max(lem.total_campaigns, 1);
+
+      document.getElementById("lemTotal").innerText = lem.total_campaigns;
+      document.getElementById("lemRunning").innerText = lem.running_campaigns;
+      document.getElementById("lemPaused").innerText = lem.paused_campaigns;
+      document.getElementById("lemDraft").innerText = lem.draft_campaigns;
+
+      document.getElementById("lemlistMarketBox").innerHTML =
+        comparisonLine("Taxa de abertura", comp.open_rate, "GMarket") +
+        comparisonLine("Taxa de resposta", comp.reply_rate, "GMarket") +
+        comparisonLine("Resposta positiva", comp.positive_reply_rate, "GPedra Comercial") +
+        comparisonLine("Reuniões geradas", comp.meeting_rate, "SDR Agent");
+
+      document.getElementById("lemlistBars").innerHTML =
+        bar("Em andamento", lem.running_campaigns, max, "green") +
+        bar("Pausadas", lem.paused_campaigns, max, "yellow") +
+        bar("Rascunhos", lem.draft_campaigns, max) +
+        bar("Arquivadas", lem.archived_campaigns, max);
+
+      document.getElementById("lemlistTable").innerHTML = state.campaigns.map(c => `
+        <tr onclick="openDrawer('${escapeHtml(c.name)}', '<p>Status: ${escapeHtml(c.status)}</p><p>Prioridade: ${escapeHtml(c.priority)}</p><p>Prioridade comercial: ${c.commercial_prioridade comercial}</p><p>${escapeHtml(c.recommendation)}</p>')">
+          <td><strong>${escapeHtml(c.name)}</strong></td>
+          <td>${badge(c.status)}</td>
+          <td>${escapeHtml(c.priority)}</td>
+          <td>${c.commercial_prioridade comercial}/100</td>
+          <td>${escapeHtml(c.recommendation)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderPipedrive() {
+      const pipe = state.comparison.pipedrive.metrics;
+      const comp = state.comparison.pipedrive.market_comparison;
+
+      document.getElementById("pipeTotal").innerText = pipe.total_deals;
+      document.getElementById("pipeOpen").innerText = pipe.open_deals;
+      document.getElementById("pipeActivities").innerText = pipe.total_activities;
+      document.getElementById("pipeNoAction").innerText = pipe.deals_without_next_activity;
+
+      document.getElementById("pipedriveMarketBox").innerHTML =
+        comparisonLine("Conversão oportunidade → venda", comp.win_rate, "GPedra Comercial") +
+        comparisonLine("Ticket médio", comp.average_deal_value, "GPedra Comercial") +
+        comparisonLine("Negócios sem próxima ação", comp.deals_without_next_activity_rate, "SDR Agent");
+
+      document.getElementById("pipedriveInsightBox").innerHTML = `
+        <div class="insight">Negócios abertos: <strong>${pipe.open_deals}</strong></div>
+        <div class="insight">Atividades pendentes: <strong>${pipe.pending_activities}</strong></div>
+        <div class="insight">Negócios sem próxima ação: <strong>${pipe.deals_without_next_activity}</strong></div>
+        <div class="insight">Valor total aberto: <strong>R$ ${Number(pipe.total_value_open || 0).toLocaleString("pt-BR")}</strong></div>
+      `;
+
+      document.getElementById("dealsTable").innerHTML = state.deals.length ? state.deals.map(d => `
+        <tr onclick="openDrawer('${escapeHtml(d.title)}', '<p>Valor: R$ ${Number(d.value || 0).toLocaleString("pt-BR")}</p><p>Status: ${escapeHtml(d.status)}</p><p>Etapa: ${escapeHtml(d.stage_id)}</p>')">
+          <td><strong>${escapeHtml(d.title)}</strong></td>
+          <td>R$ ${Number(d.value || 0).toLocaleString("pt-BR")}</td>
+          <td>${badge(d.status)}</td>
+          <td>${escapeHtml(d.stage_id)}</td>
+          <td>${fmtDate(d.add_time)}</td>
+        </tr>
+      `).join("") : `<tr><td colspan="5">Nenhum negócio retornado.</td></tr>`;
+    }
+
+    function renderComparison() {
+      const lemComp = state.comparison.lemlist.market_comparison;
+      const pipeComp = state.comparison.pipedrive.market_comparison;
+
+      document.getElementById("compareLemlist").innerHTML =
+        comparisonLine("Resposta Lemlist x mercado", lemComp.reply_rate, "GMarket") +
+        comparisonLine("Reuniões Lemlist x mercado", lemComp.meeting_rate, "SDR Agent");
+
+      document.getElementById("comparePipedrive").innerHTML =
+        comparisonLine("Conversão em venda x mercado", pipeComp.win_rate, "GPedra Comercial") +
+        comparisonLine("Negócios sem próxima ação x ideal", pipeComp.deals_without_next_activity_rate, "SDR Agent");
+
+      document.getElementById("crossAnalysis").innerHTML = (state.comparison.cross_analysis || []).map(item => `
+        <div class="insight">
+          <strong>${escapeHtml(item.question)}</strong>
+          <p>${escapeHtml(item.answer)}</p>
+        </div>
+      `).join("");
+
+      document.getElementById("rankingTable").innerHTML = state.campaigns.map(c => `
+        <tr>
+          <td><strong>${escapeHtml(c.name)}</strong></td>
+          <td>${badge(c.status)}</td>
+          <td>${escapeHtml(c.priority)}</td>
+          <td>${c.commercial_prioridade comercial}/100</td>
+          <td>${escapeHtml(c.agent_responsible)}</td>
+          <td>${escapeHtml(c.recommendation)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderBenchmarks() {
+      const b = state.comparison.benchmarks || {};
+
+      document.getElementById("benchmarksBox").innerHTML = Object.entries(b).map(([key, value]) => `
+        <div class="insight"><strong>${escapeHtml(key)}</strong>: ${escapeHtml(value)}</div>
+      `).join("");
+
+      document.getElementById("benchReply").value = b.lemlist_reply_rate ?? 8;
+      document.getElementById("benchMeeting").value = b.lemlist_meeting_rate ?? 1.5;
+      document.getElementById("benchWin").value = b.pipedrive_opportunity_to_win_rate ?? 20;
+      document.getElementById("benchTicket").value = b.pipedrive_expected_average_deal_value ?? 150000;
+      document.getElementById("benchNoAction").value = b.pipedrive_max_overdue_activity_rate ?? 5;
+    }
+
+    async function saveBenchmarks() {
+      const dados da ação = {
+        benchmarks: {
+          lemlist_reply_rate: Number(document.getElementById("benchReply").value),
+          lemlist_meeting_rate: Number(document.getElementById("benchMeeting").value),
+          pipedrive_opportunity_to_win_rate: Number(document.getElementById("benchWin").value),
+          pipedrive_expected_average_deal_value: Number(document.getElementById("benchTicket").value),
+          pipedrive_max_overdue_activity_rate: Number(document.getElementById("benchNoAction").value)
+        }
+      };
+
+      const result = await fetchJson("/commercial/benchmarks", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: detalhes.stringify(dados da ação)
+      });
+
+      openDrawer("Dados de mercado atualizados", `<pre>${escapeHtml(detalhes.stringify(result, null, 2))}</pre>`);
+      loadAll();
+    }
+
+    async function runRoundtable() {
+      const dados da ação = {
+        campaign_name: document.getElementById("roundCampaign").value,
+        objective: document.getElementById("roundObjective").value,
+        target_audience: document.getElementById("roundAudience").value,
+        pain_points: document.getElementById("roundPain").value,
+        current_message: document.getElementById("roundMessage").value,
+        created_by: "Jaasiel"
+      };
+
+      const result = await fetchJson("/agents/roundtable", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: detalhes.stringify(dados da ação)
+      });
+
+      document.getElementById("roundtableResult").innerHTML = `<pre>${escapeHtml(detalhes.stringify(result, null, 2))}</pre>`;
+    }
+
+    function fillAgentSelect() {
+      const approved = state.agents.filter(a => a.status === "approved");
+      const baseOptions = [
+        `<option value="gpedra_comercial">GPedra Comercial</option>`,
+        `<option value="gpedra_engenharia">GPedra Engenharia</option>`,
+        `<option value="gpedra_tech">GPedra Tech</option>`,
+        `<option value="gmarket">GMarket</option>`
+      ];
+
+      const customOptions = approved.map(a => `<option value="${escapeHtml(a.agent_id)}">${escapeHtml(a.name)}</option>`);
+      document.getElementById("campaignAgent").innerHTML = [...baseOptions, ...customOptions].join("");
+    }
+
+    async function createAgent() {
+      const dados da ação = {
+        name: document.getElementById("agentName").value,
+        specialty: document.getElementById("agentSpecialty").value,
+        instructions: document.getElementById("agentInstructions").value,
+        created_by: "Jaasiel"
+      };
+
+      const result = await fetchJson("/ai-agents", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: detalhes.stringify(dados da ação)
+      });
+
+      openDrawer("Agente criado para aprovação", `<pre>${escapeHtml(detalhes.stringify(result, null, 2))}</pre>`);
+      loadAll();
+    }
+
+    function renderAgents() {
+      document.getElementById("agentsBox").innerHTML = state.agents.length ? state.agents.map(a => `
+        <div class="insight">
+          <strong>${escapeHtml(a.name)}</strong> ${badge(a.status)}
+          <p>${escapeHtml(a.specialty)}</p>
+        </div>
+      `).join("") : `<div class="insight">Nenhum agente personalizado criado ainda.</div>`;
+    }
+
+    async function createCampaignDraft() {
+      const dados da ação = {
+        objective: document.getElementById("campaignObjective").value,
+        target_audience: document.getElementById("campaignAudience").value,
+        offer: document.getElementById("campaignOffer").value,
+        pain_points: document.getElementById("campaignPain").value,
+        agent_id: document.getElementById("campaignAgent").value,
+        created_by: "Jaasiel"
+      };
+
+      const result = await fetchJson("/ai/campaign-drafts", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: detalhes.stringify(dados da ação)
+      });
+
+      openDrawer("Campanha criada para aprovação", `<pre>${escapeHtml(detalhes.stringify(result, null, 2))}</pre>`);
+      loadAll();
+    }
+
+    function renderCampaignDrafts() {
+      document.getElementById("campaignDraftsBox").innerHTML = state.drafts.length ? state.drafts.map(d => `
+        <div class="insight">
+          <strong>${escapeHtml(d.objective)}</strong> ${badge(d.status)}
+          <p>${escapeHtml(d.target_audience)}</p>
+        </div>
+      `).join("") : `<div class="insight">Nenhuma campanha criada ainda.</div>`;
+    }
+
+    function renderApprovals() {
+      const pendingAgents = state.agents.filter(a => a.status === "pending_approval");
+      const pendingDrafts = state.drafts.filter(d => d.status === "pending_approval");
+
+      document.getElementById("pendingAgentsBox").innerHTML = pendingAgents.length ? pendingAgents.map(a => `
+        <div class="insight">
+          <strong>${escapeHtml(a.name)}</strong>
+          <p>${escapeHtml(a.specialty)}</p>
+          <button class="btn" onclick="decideAgent('${a.agent_id}', 'approve')">Aprovar agente</button>
+          <button class="btn secondary" onclick="decideAgent('${a.agent_id}', 'reject')">Rejeitar</button>
+        </div>
+      `).join("") : `<div class="insight">Nenhum agente pendente.</div>`;
+
+      document.getElementById("pendingDraftsBox").innerHTML = pendingDrafts.length ? pendingDrafts.map(d => `
+        <div class="insight">
+          <strong>${escapeHtml(d.objective)}</strong>
+          <p>${escapeHtml(d.target_audience)}</p>
+          <button class="btn" onclick="decideDraft('${d.draft_id}', 'approve')">Aprovar campanha</button>
+          <button class="btn secondary" onclick="decideDraft('${d.draft_id}', 'reject')">Rejeitar</button>
+        </div>
+      `).join("") : `<div class="insight">Nenhuma campanha pendente.</div>`;
+    }
+
+    async function decideAgent(agentId, decision) {
+      const result = await fetchJson("/ai-agents/decision", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: detalhes.stringify({agent_id: agentId, decision, reviewer: "Jaasiel"})
+      });
+
+      openDrawer("Decisão registrada", `<pre>${escapeHtml(detalhes.stringify(result, null, 2))}</pre>`);
+      loadAll();
+    }
+
+    async function decideDraft(draftId, decision) {
+      const result = await fetchJson("/ai/campaign-drafts/decision", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: detalhes.stringify({draft_id: draftId, decision, reviewer: "Jaasiel"})
+      });
+
+      openDrawer("Decisão registrada", `<pre>${escapeHtml(detalhes.stringify(result, null, 2))}</pre>`);
+      loadAll();
+    }
+
+    async function registerLogin() {
+      const dados da ação = {
+        name: document.getElementById("loginName").value,
+        role: document.getElementById("loginRole").value
+      };
+
+      const result = await fetchJson("/auth/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: detalhes.stringify(dados da ação)
+      });
+
+      openDrawer("Acesso registrado", `<pre>${escapeHtml(detalhes.stringify(result, null, 2))}</pre>`);
+      loadAll();
+    }
+
+    function renderAccessLogs() {
+      document.getElementById("accessLogTable").innerHTML = state.accessLogs.length ? state.accessLogs.slice().reverse().map(l => `
+        <tr>
+          <td>${escapeHtml(l.name)}</td>
+          <td>${escapeHtml(l.role)}</td>
+          <td>${fmtDate(l.accessed_at)}</td>
+        </tr>
+      `).join("") : `<tr><td colspan="3">Nenhum acesso registrado ainda.</td></tr>`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setupTabs();
+      loadAll();
+    });
+  </script>
+
+<!-- FIX-ABAS-CLICAVEIS-INICIO -->
+
+<script>
+(function () {
+  function ativarAbas() {
+    const botoes = document.querySelectorAll(".tab-btn");
+    const abas = document.querySelectorAll(".tab");
+
+    botoes.forEach(function (botao) {
+      botao.onclick = function () {
+        const alvo = botao.getAttribute("data-tab");
+
+        botoes.forEach(function (b) {
+          b.classList.remove("active");
+        });
+
+        abas.forEach(function (aba) {
+          aba.classList.remove("active");
+        });
+
+        botao.classList.add("active");
+
+        const abaAlvo = document.getElementById(alvo);
+        if (abaAlvo) {
+          abaAlvo.classList.add("active");
+        } else {
+          console.error("Aba não encontrada:", alvo);
+        }
+      };
+    });
+  }
+
+  function abrirGaveta(titulo, conteudo) {
+    const drawer = document.getElementById("drawer");
+    const drawerContent = document.getElementById("drawerContent");
+
+    if (!drawer || !drawerContent) return;
+
+    drawerContent.innerHTML = "<h2>" + titulo + "</h2>" + conteudo;
+    drawer.classList.add("open");
+  }
+
+  function fecharGaveta() {
+    const drawer = document.getElementById("drawer");
+    if (drawer) drawer.classList.remove("open");
+  }
+
+  window.closeDrawer = fecharGaveta;
+  window.openDrawer = abrirGaveta;
+
+  document.addEventListener("DOMContentLoaded", function () {
+    ativarAbas();
+
+    const primeiraAba = document.querySelector(".tab");
+    const primeiroBotao = document.querySelector(".tab-btn");
+
+    if (primeiraAba && !document.querySelector(".tab.active")) {
+      primeiraAba.classList.add("active");
+    }
+
+    if (primeiroBotao && !document.querySelector(".tab-btn.active")) {
+      primeiroBotao.classList.add("active");
+    }
+  });
+})();
+</script>
+
+<!-- FIX-ABAS-CLICAVEIS-FIM -->
+
+<!-- HOTFIX-SUBACOES-INICIO -->
+<script>
+(function () {
+  async function api(url, options = {}) {
+    const response = await fetch(url, options);
+    const contentType = response.headers.get("content-type") || "";
+
+    if (!response.ok) {
+      const txt = await response.text();
+      throw new Error("Erro " + response.status + " em " + url + ": " + txt);
+    }
+
+    if (contentType.includes("application/json")) {
+      return await response.json();
+    }
+
+    return await response.text();
+  }
+
+  function el(id) {
+    return document.getElementById(id);
+  }
+
+  function setHtml(id, html) {
+    const node = el(id);
+    if (node) node.innerHTML = html;
+  }
+
+  function setText(id, value) {
+    const node = el(id);
+    if (node) node.innerText = value ?? "-";
+  }
+
+  function escapeText(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
+  function statusLabel(status) {
+    const map = {
+      running: "Em andamento",
+      paused: "Pausada",
+      draft: "Rascunho",
+      archived: "Arquivada",
+      open: "Aberto",
+      won: "Ganho",
+      lost: "Perdido",
+      pending: "Aguardando",
+      pending_approval: "Aguardando aprovação",
+      approved: "Aprovado",
+      approved_executed: "Autorizado e executado",
+      approved_waiting_lemlist_creation: "Aprovado para criação",
+      rejected: "Rejeitado",
+      create_activity: "Criar atividade de follow-up",
+      add_note: "Adicionar nota no negócio",
+      update_deal: "Atualizar negócio"
+    };
+
+    return map[status] || status || "-";
+  }
+
+  function badge(status) {
+    const label = statusLabel(status);
+    let cls = "status-draft";
+
+    const s = String(status || label).toLowerCase();
+
+    if (s.includes("running") || s.includes("approved") || s.includes("executado") || s.includes("ganho")) {
+      cls = "status-running";
+    }
+
+    if (s.includes("pending") || s.includes("aguardando") || s.includes("paused") || s.includes("pausada")) {
+      cls = "status-pending";
+    }
+
+    if (s.includes("rejected") || s.includes("rejeitado") || s.includes("lost") || s.includes("perdido")) {
+      cls = "status-rejected";
+    }
+
+    return '<span class="badge ' + cls + '">' + escapeText(label) + '</span>';
+  }
+
+
+
+  function formatarObjetoComercial(data) {
+    if (!data || typeof data !== "object") {
+      return "<p>" + escapeText(data) + "</p>";
+    }
+
+    if (data.message && data.summary) {
+      return `
+        <div class="insight">
+          <strong>${escapeText(data.message)}</strong>
+        </div>
+        ${formatarObjetoComercial(data.summary)}
+      `;
+    }
+
+    const labels = {
+      ok: "Status da operação",
+      message: "Mensagem",
+      summary: "Resumo",
+      open_deals: "Negócios abertos analisados",
+      pending_activities: "Atividades pendentes",
+      deals_without_next_activity: "Negócios sem próxima ação",
+      deals_without_value: "Negócios sem valor estimado",
+      suggested_actions: "Ações sugeridas",
+      action: "Ação",
+      action_id: "Código interno da ação",
+      type: "Tipo de ação",
+      status: "Status",
+      source: "Origem",
+      deal_id: "Código do negócio",
+      deal_title: "Negócio",
+      problem: "Problema identificado",
+      agent: "Agente responsável",
+      recommendation: "Recomendação",
+      agent_opinions: "Opinião dos agentes",
+      agent_conclusion: "Conclusão dos agentes",
+      created_at: "Criado em",
+      reviewed_by: "Revisado por",
+      reviewed_at: "Revisado em",
+      execution_result: "Resultado da execução",
+      payload: "Dados da ação"
+    };
+
+    const valueLabels = {
+      pending_approval: "Aguardando aprovação",
+      approved_executed: "Autorizado e executado",
+      rejected: "Rejeitado",
+      create_activity: "Criar atividade de follow-up",
+      add_note: "Adicionar nota no negócio",
+      update_deal: "Atualizar negócio",
+      pipedrive_failure_analysis: "Análise de oportunidades no Pipedrive"
+    };
+
+    function label(key) {
+      return labels[key] || key;
+    }
+
+    function value(v) {
+      if (v === null || v === undefined) return "-";
+      if (typeof v === "string") return valueLabels[v] || v;
+      return v;
+    }
+
+    return Object.entries(data).map(([key, val]) => {
+      if (key === "payload" || key === "execution_result") {
+        return "";
+      }
+
+      if (typeof val === "object" && val !== null) {
+        return `
+          <div class="insight">
+            <strong>${escapeText(label(key))}</strong>
+            ${formatarObjetoComercial(val)}
+          </div>
+        `;
+      }
+
+      return `<p><strong>${escapeText(label(key))}:</strong> ${escapeText(value(val))}</p>`;
+    }).join("");
+  }
+
+
+  function openPanel(title, data) {
+    const drawer = el("drawer");
+    const content = el("drawerContent");
+
+    if (!drawer || !content) {
+      alert(title + "\n\n" + JSON.stringify(data, null, 2));
+      return;
+    }
+
+    let body = "";
+
+    if (typeof data === "string") {
+      if (data.trim().startsWith("<")) {
+        body = data;
+      } else {
+        body = "<p>" + escapeText(data) + "</p>";
+      }
+    } else {
+      body = formatarObjetoComercial(data);
+    }
+
+    content.innerHTML = "<h2>" + escapeText(title) + "</h2>" + body;
+    drawer.classList.add("open");
+  }
+
+  window.closeDrawer = function () {
+    const drawer = el("drawer");
+    if (drawer) drawer.classList.remove("open");
+  };
+
+  function noData(message) {
+    return '<div class="insight">' + escapeText(message) + '</div>';
+  }
+
+  function fmtDate(value) {
+    if (!value) return "-";
+    try {
+      return new Date(value).toLocaleString("pt-BR");
+    } catch {
+      return value;
+    }
+  }
+
+  async function carregarTudo() {
+    let health = null;
+    let lemlist = null;
+    let comparison = null;
+    let overview = null;
+    let pipeSmart = null;
+
+    try { health = await api("/health"); } catch (e) {}
+    try { lemlist = await api("/lemlist/campaigns"); } catch (e) {}
+    try { comparison = await api("/commercial/comparison"); } catch (e) {}
+    try { overview = await api("/ai-control/overview"); } catch (e) {}
+    try { pipeSmart = await api("/pipedrive-intelligence/overview"); } catch (e) {}
+
+    const campaigns = lemlist?.campaigns || comparison?.lemlist?.campaigns_ranked || [];
+    const rankedCampaigns = comparison?.lemlist?.campaigns_ranked || [];
+    const lemMetrics = comparison?.lemlist?.metrics || {};
+    const pipeMetrics = comparison?.pipedrive?.metrics || {};
+    const deals = comparison?.pipedrive?.deals_sample || overview?.pipedrive?.deals?.data || [];
+    const activities = comparison?.pipedrive?.activities_sample || overview?.pipedrive?.activities?.data || [];
+    const agents = overview?.agents || [];
+    const drafts = overview?.campaign_drafts || [];
+    const accessLogs = overview?.access_logs || [];
+    const smartSummary = pipeSmart?.analysis?.summary || {};
+    const smartActions = pipeSmart?.actions?.latest || [];
+
+    setText("kpiCampaigns", lemMetrics.total_campaigns ?? campaigns.length);
+    setText("kpiRunning", lemMetrics.running_campaigns ?? campaigns.filter(c => c.status === "running").length);
+    setText("kpiDeals", pipeMetrics.total_deals ?? deals.length);
+    setText("kpiApprovals", agents.filter(a => a.status === "pending_approval").length + drafts.filter(d => d.status === "pending_approval").length);
+
+    setText("lemTotal", lemMetrics.total_campaigns ?? campaigns.length);
+    setText("lemRunning", lemMetrics.running_campaigns ?? campaigns.filter(c => c.status === "running").length);
+    setText("lemPaused", lemMetrics.paused_campaigns ?? campaigns.filter(c => c.status === "paused").length);
+    setText("lemDraft", lemMetrics.draft_campaigns ?? campaigns.filter(c => c.status === "draft").length);
+
+    setText("pipeTotal", pipeMetrics.total_deals ?? deals.length);
+    setText("pipeOpen", pipeMetrics.open_deals ?? deals.filter(d => d.status === "open").length);
+    setText("pipeActivities", pipeMetrics.total_activities ?? activities.length);
+    setText("pipeNoAction", pipeMetrics.deals_without_next_activity ?? "-");
+
+    setText("smartOpenDeals", smartSummary.open_deals ?? pipeMetrics.open_deals ?? "-");
+    setText("smartNoAction", smartSummary.deals_without_next_activity ?? pipeMetrics.deals_without_next_activity ?? "-");
+    setText("smartNoValue", smartSummary.deals_without_value ?? "-");
+    setText("smartActions", pipeSmart?.actions?.pending ?? "-");
+
+    setHtml("summaryBox", `
+      <div class="insight"><strong>Lemlist:</strong> ${campaigns.length} campanhas carregadas.</div>
+      <div class="insight"><strong>Pipedrive:</strong> ${deals.length} negócios carregados e ${activities.length} atividades carregadas.</div>
+      <div class="insight"><strong>Aprovações:</strong> ${agents.filter(a => a.status === "pending_approval").length} agentes e ${drafts.filter(d => d.status === "pending_approval").length} campanhas aguardando decisão.</div>
+    `);
+
+    setHtml("priorityBox", `
+      <div class="insight">1. Analisar negócios sem próxima ação no Pipedrive.</div>
+      <div class="insight">2. Cruzar campanhas do Lemlist com oportunidades criadas no CRM.</div>
+      <div class="insight">3. Aprovar manualmente qualquer ação antes de executar.</div>
+    `);
+
+    setHtml("lemlistTable", rankedCampaigns.length ? rankedCampaigns.map(c => `
+      <tr onclick='window._abrirCampanha(${JSON.stringify(c).replaceAll("'", "&#39;")})'>
+        <td><strong>${escapeText(c.name)}</strong></td>
+        <td>${badge(c.status)}</td>
+        <td>${escapeText(c.priority || "-")}</td>
+        <td>${escapeText(c.commercial_score ?? "-")}/100</td>
+        <td>${escapeText(c.recommendation || "-")}</td>
+      </tr>
+    `).join("") : `<tr><td colspan="5">Nenhuma campanha ranqueada. Verifique o endpoint /commercial/comparison.</td></tr>`);
+
+    setHtml("dealsTable", deals.length ? deals.map(d => `
+      <tr onclick='window._abrirNegocio(${JSON.stringify(d).replaceAll("'", "&#39;")})'>
+        <td><strong>${escapeText(d.title || "-")}</strong></td>
+        <td>R$ ${Number(d.value || 0).toLocaleString("pt-BR")}</td>
+        <td>${badge(d.status)}</td>
+        <td>${escapeText(d.stage_id || "-")}</td>
+        <td>${fmtDate(d.add_time)}</td>
+      </tr>
+    `).join("") : `<tr><td colspan="5">Nenhum negócio carregado do Pipedrive.</td></tr>`);
+
+    const pendingSmart = smartActions.filter(a => a.status === "pending_approval").slice().reverse();
+
+    setHtml("smartSummaryBox", `
+      <div class="insight">Negócios abertos analisados: <strong>${smartSummary.open_deals ?? "-"}</strong></div>
+      <div class="insight">Negócios sem próxima ação: <strong>${smartSummary.deals_without_next_activity ?? "-"}</strong></div>
+      <div class="insight">Negócios sem valor estimado: <strong>${smartSummary.deals_without_value ?? "-"}</strong></div>
+      <div class="insight">Ações sugeridas: <strong>${smartSummary.suggested_actions ?? "-"}</strong></div>
+    `);
+
+    setHtml("smartActionsTable", pendingSmart.length ? pendingSmart.map(a => `
+      <tr>
+        <td><strong>${escapeText(a.deal_title || "-")}</strong></td>
+        <td>${escapeText(a.problem || "-")}</td>
+        <td>${escapeText(a.agent || "-")}</td>
+        <td>${escapeText(a.recommendation || "-")}</td>
+        <td>${badge(a.status)}</td>
+        <td>
+          <button class="btn secondary" onclick="verOpiniaoAgentes('${a.action_id}')">Ver opinião dos agentes</button>
+          <button class="btn" onclick="decidePipedriveAction('${a.action_id}', 'approve')">Autorizar</button>
+          <button class="btn secondary" onclick="decidePipedriveAction('${a.action_id}', 'reject')">Rejeitar</button>
+        </td>
+      </tr>
+    `).join("") : `<tr><td colspan="6">Nenhuma ação pendente. Clique em “Analisar oportunidades de melhoria”.</td></tr>`);
+
+    setHtml("agentsBox", agents.length ? agents.map(a => `
+      <div class="insight">
+        <strong>${escapeText(a.name)}</strong> ${badge(a.status)}
+        <p>${escapeText(a.specialty || "")}</p>
+      </div>
+    `).join("") : noData("Nenhum agente criado ainda."));
+
+    setHtml("campaignDraftsBox", drafts.length ? drafts.map(d => `
+      <div class="insight">
+        <strong>${escapeText(d.objective)}</strong> ${badge(d.status)}
+        <p>${escapeText(d.target_audience || "")}</p>
+      </div>
+    `).join("") : noData("Nenhuma campanha criada ainda."));
+
+    const pendingAgents = agents.filter(a => a.status === "pending_approval");
+    const pendingDrafts = drafts.filter(d => d.status === "pending_approval");
+
+    setHtml("pendingAgentsBox", pendingAgents.length ? pendingAgents.map(a => `
+      <div class="insight">
+        <strong>${escapeText(a.name)}</strong>
+        <p>${escapeText(a.specialty || "")}</p>
+        <button class="btn" onclick="decideAgent('${a.agent_id}', 'approve')">Aprovar agente</button>
+        <button class="btn secondary" onclick="decideAgent('${a.agent_id}', 'reject')">Rejeitar</button>
+      </div>
+    `).join("") : noData("Nenhum agente aguardando aprovação."));
+
+    setHtml("pendingDraftsBox", pendingDrafts.length ? pendingDrafts.map(d => `
+      <div class="insight">
+        <strong>${escapeText(d.objective)}</strong>
+        <p>${escapeText(d.target_audience || "")}</p>
+        <button class="btn" onclick="decideDraft('${d.draft_id}', 'approve')">Aprovar campanha</button>
+        <button class="btn secondary" onclick="decideDraft('${d.draft_id}', 'reject')">Rejeitar</button>
+      </div>
+    `).join("") : noData("Nenhuma campanha aguardando aprovação."));
+
+    setHtml("accessLogTable", accessLogs.length ? accessLogs.slice().reverse().map(l => `
+      <tr>
+        <td>${escapeText(l.name)}</td>
+        <td>${escapeText(l.role)}</td>
+        <td>${fmtDate(l.accessed_at)}</td>
+      </tr>
+    `).join("") : `<tr><td colspan="3">Nenhum acesso registrado ainda.</td></tr>`);
+
+    const campaignAgent = el("campaignAgent");
+    if (campaignAgent) {
+      const approvedAgents = agents.filter(a => a.status === "approved");
+      campaignAgent.innerHTML = `
+        <option value="gpedra_comercial">GPedra Comercial</option>
+        <option value="gpedra_engenharia">GPedra Engenharia</option>
+        <option value="gpedra_tech">GPedra Tech</option>
+        <option value="gmarket">GMarket</option>
+        ${approvedAgents.map(a => `<option value="${escapeText(a.agent_id)}">${escapeText(a.name)}</option>`).join("")}
+      `;
+    }
+
+    const comp = comparison?.lemlist?.market_comparison || {};
+    const pipeComp = comparison?.pipedrive?.market_comparison || {};
+    setHtml("compareLemlist", `
+      <div class="insight"><strong>Taxa de resposta:</strong> ${badge(comp.reply_rate?.status)}<br>${escapeText(comp.reply_rate?.recommendation || "Dados reais ainda pendentes.")}</div>
+      <div class="insight"><strong>Reuniões:</strong> ${badge(comp.meeting_rate?.status)}<br>${escapeText(comp.meeting_rate?.recommendation || "Dados reais ainda pendentes.")}</div>
+    `);
+
+    setHtml("comparePipedrive", `
+      <div class="insight"><strong>Conversão em venda:</strong> ${badge(pipeComp.win_rate?.status)}<br>${escapeText(pipeComp.win_rate?.recommendation || "-")}</div>
+      <div class="insight"><strong>Negócios sem próxima ação:</strong> ${badge(pipeComp.deals_without_next_activity_rate?.status)}<br>${escapeText(pipeComp.deals_without_next_activity_rate?.recommendation || "-")}</div>
+    `);
+
+    setHtml("crossAnalysis", (comparison?.cross_analysis || []).map(i => `
+      <div class="insight"><strong>${escapeText(i.question)}</strong><p>${escapeText(i.answer)}</p></div>
+    `).join("") || noData("Análise cruzada ainda não disponível."));
+
+    setHtml("rankingTable", rankedCampaigns.length ? rankedCampaigns.map(c => `
+      <tr>
+        <td><strong>${escapeText(c.name)}</strong></td>
+        <td>${badge(c.status)}</td>
+        <td>${escapeText(c.priority || "-")}</td>
+        <td>${escapeText(c.commercial_score ?? "-")}/100</td>
+        <td>${escapeText(c.agent_responsible || "-")}</td>
+        <td>${escapeText(c.recommendation || "-")}</td>
+      </tr>
+    `).join("") : `<tr><td colspan="6">Ranking ainda não disponível.</td></tr>`);
+
+    setHtml("benchmarksBox", comparison?.benchmarks ? Object.entries(comparison.benchmarks).map(([k, v]) => `
+      <div class="insight"><strong>${escapeText(k)}</strong>: ${escapeText(v)}</div>
+    `).join("") : noData("Referências de mercado ainda não carregadas."));
+  }
+
+  window._abrirCampanha = function (campanha) {
+    openPanel("Detalhes da campanha", campanha);
+  };
+
+  window._abrirNegocio = function (negocio) {
+    openPanel("Detalhes do negócio", negocio);
+  };
+
+  window.loadAll = carregarTudo;
+
+  window.analyzePipedrive = async function () {
+    try {
+      const result = await api("/pipedrive-intelligence/analyze", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"}
+      });
+
+      openPanel("Análise concluída", result);
+      await carregarTudo();
+    } catch (e) {
+      openPanel("Erro ao analisar Pipedrive", e.message);
+    }
+  };
+
+
+
+    function blocoOpiniaoAgentes(action) {
+      const opinions = action.agent_opinions || {};
+
+      return `
+        <div class="insight">
+          <strong>Opinião dos agentes antes da autorização</strong>
+          <p><strong>GPedra Comercial:</strong> ${escapeText(opinions.gpedra_comercial || "Não informado.")}</p>
+          <p><strong>GPedra Engenharia:</strong> ${escapeText(opinions.gpedra_engenharia || "Não informado.")}</p>
+          <p><strong>GPedra Tech:</strong> ${escapeText(opinions.gpedra_tech || "Não informado.")}</p>
+          <p><strong>GMarket:</strong> ${escapeText(opinions.gmarket || "Não informado.")}</p>
+          <p><strong>SDR Agent:</strong> ${escapeText(opinions.sdr_agent || "Não informado.")}</p>
+          <hr>
+          <p><strong>Conclusão consolidada:</strong> ${escapeText(action.agent_conclusion || action.recommendation || "-")}</p>
+        </div>
+      `;
+    }
+
+    window.verOpiniaoAgentes = function (actionId) {
+      fetch("/pipedrive-intelligence/actions?status=pending_approval")
+        .then(r => r.json())
+        .then(data => {
+          const actions = data.actions || [];
+          const action = actions.find(a => a.action_id === actionId);
+
+          if (!action) {
+            openPanel("Opinião dos agentes", "Ação não encontrada ou já processada.");
+            return;
+          }
+
+          openPanel("Opinião dos agentes", blocoOpiniaoAgentes(action));
+        })
+        .catch(error => {
+          openPanel("Erro", error.message);
+        });
+    };
+
+
+  window.decidePipedriveAction = async function (actionId, decision) {
+    try {
+      const result = await api("/pipedrive-intelligence/actions/decision", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          action_id: actionId,
+          decision: decision,
+          reviewer: "Jaasiel"
+        })
+      });
+
+      openPanel("Decisão aplicada", result);
+      await carregarTudo();
+    } catch (e) {
+      openPanel("Erro ao aplicar decisão", e.message);
+    }
+  };
+
+  window.saveBenchmarks = async function () {
+    try {
+      const result = await api("/commercial/benchmarks", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          benchmarks: {
+            lemlist_reply_rate: Number(el("benchReply")?.value || 8),
+            lemlist_meeting_rate: Number(el("benchMeeting")?.value || 1.5),
+            pipedrive_opportunity_to_win_rate: Number(el("benchWin")?.value || 20),
+            pipedrive_expected_average_deal_value: Number(el("benchTicket")?.value || 150000),
+            pipedrive_max_overdue_activity_rate: Number(el("benchNoAction")?.value || 5)
+          }
+        })
+      });
+
+      openPanel("Referências salvas", result);
+      await carregarTudo();
+    } catch (e) {
+      openPanel("Erro ao salvar referências", e.message);
+    }
+  };
+
+  window.runRoundtable = async function () {
+    try {
+      const result = await api("/agents/roundtable", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          campaign_name: el("roundCampaign")?.value || "",
+          objective: el("roundObjective")?.value || "",
+          target_audience: el("roundAudience")?.value || "",
+          pain_points: el("roundPain")?.value || "",
+          current_message: el("roundMessage")?.value || "",
+          created_by: "Jaasiel"
+        })
+      });
+
+      setHtml("roundtableResult", "<pre>" + escapeText(JSON.stringify(result, null, 2)) + "</pre>");
+    } catch (e) {
+      setHtml("roundtableResult", noData("Erro ao rodar conversa: " + e.message));
+    }
+  };
+
+  window.createAgent = async function () {
+    try {
+      const result = await api("/ai-agents", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          name: el("agentName")?.value || "",
+          specialty: el("agentSpecialty")?.value || "",
+          instructions: el("agentInstructions")?.value || "",
+          created_by: "Jaasiel"
+        })
+      });
+
+      openPanel("Agente criado para aprovação", result);
+      await carregarTudo();
+    } catch (e) {
+      openPanel("Erro ao criar agente", e.message);
+    }
+  };
+
+  window.createCampaignDraft = async function () {
+    try {
+      const result = await api("/ai/campaign-drafts", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          objective: el("campaignObjective")?.value || "",
+          target_audience: el("campaignAudience")?.value || "",
+          offer: el("campaignOffer")?.value || "",
+          pain_points: el("campaignPain")?.value || "",
+          agent_id: el("campaignAgent")?.value || "gpedra_comercial",
+          created_by: "Jaasiel"
+        })
+      });
+
+      openPanel("Campanha criada para aprovação", result);
+      await carregarTudo();
+    } catch (e) {
+      openPanel("Erro ao criar campanha", e.message);
+    }
+  };
+
+  window.decideAgent = async function (agentId, decision) {
+    try {
+      const result = await api("/ai-agents/decision", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({agent_id: agentId, decision: decision, reviewer: "Jaasiel"})
+      });
+
+      openPanel("Decisão registrada", result);
+      await carregarTudo();
+    } catch (e) {
+      openPanel("Erro ao decidir agente", e.message);
+    }
+  };
+
+  window.decideDraft = async function (draftId, decision) {
+    try {
+      const result = await api("/ai/campaign-drafts/decision", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({draft_id: draftId, decision: decision, reviewer: "Jaasiel"})
+      });
+
+      openPanel("Decisão registrada", result);
+      await carregarTudo();
+    } catch (e) {
+      openPanel("Erro ao decidir campanha", e.message);
+    }
+  };
+
+  window.registerLogin = async function () {
+    try {
+      const result = await api("/auth/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          name: el("loginName")?.value || "Jaasiel Gomes",
+          role: el("loginRole")?.value || "gestor"
+        })
+      });
+
+      openPanel("Acesso registrado", result);
+      await carregarTudo();
+    } catch (e) {
+      openPanel("Erro ao registrar acesso", e.message);
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(carregarTudo, 300);
+  });
+})();
+</script>
+<!-- HOTFIX-SUBACOES-FIM -->
+
+</body>
+</html>

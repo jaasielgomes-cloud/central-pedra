@@ -1,0 +1,475 @@
+import os
+import base64
+import json
+import uuid
+import datetime
+from typing import Any, Dict, Optional
+
+import requests
+from dotenv import load_dotenv
+from fastapi import FastAPI, Header, HTTPException
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel, Field
+
+
+load_dotenv()
+
+APP_NAME = "Internal Sales Automation - Grupo Pedra"
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+
+PIPEDRIVE_API_KEY = os.getenv("PIPEDRIVE_API_KEY") or os.getenv("PIPEDRIVE_API_TOKEN", "")
+PIPEDRIVE_BASE_URL = os.getenv("PIPEDRIVE_BASE_URL", "https://api.pipedrive.com").rstrip("/")
+
+LEMLIST_API_KEY = os.getenv("LEMLIST_API_KEY", "")
+LEMLIST_CAMPAIGN_ID = os.getenv("LEMLIST_CAMPAIGN_ID", "")
+LEMLIST_BASE_URL = os.getenv("LEMLIST_BASE_URL", "https://api.lemlist.com").rstrip("/")
+LEMLIST_WEBHOOK_TOKEN = os.getenv("LEMLIST_WEBHOOK_TOKEN", "dev-token")
+
+APPROVALS_FILE = "approvals_queue.jsonl"
+LOG_FILE = "events_log.jsonl"
+
+load_dotenv()
+
+app = FastAPI(
+    title=APP_NAME,
+    description="MVP interno para analisar leads do Lemlist com OpenAI, criar registros no Pipedrive e exigir aprovação humana antes de responder.",
+    version="0.1.0",
+)
+
+
+class LeadEvent(BaseModel):
+    lead_email: str = Field(..., description="Email do lead")
+    lead_name: Optional[str] = Field(default=None, description="Nome do lead")
+    company_name: Optional[str] = Field(default=None, description="Empresa do lead")
+    message: str = Field(..., description="Mensagem recebida do lead")
+    source: str = Field(default="manual_simulate", description="Origem do evento")
+    campaign_id: Optional[str] = Field(default=None, description="ID da campanha Lemlist, se houver")
+
+
+class ApprovalDecision(BaseModel):
+    approval_id: str
+    decision: str = Field(..., description="approve ou reject")
+    edited_reply: Optional[str] = Field(default=None, description="Resposta editada antes do envio")
+    reviewer: Optional[str] = Field(default="Jaasiel", description="Quem aprovou/rejeitou")
+
+
+def now_iso() -> str:
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+def append_jsonl(path: str, data: Dict[str, Any]) -> None:
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(data, ensure_ascii=False) + "\n")
+
+
+def read_jsonl(path: str) -> list[Dict[str, Any]]:
+    if not os.path.exists(path):
+        return []
+    rows = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    return rows
+
+
+def choose_specialist(message: str) -> str:
+    text = message.lower()
+    if any(word in text for word in ["preço", "valor", "orçamento", "custo", "barato", "caro", "budget"]):
+        return "pricing_agent"
+    if any(word in text for word in ["técnico", "obra", "projeto", "vala", "óleo", "efluente", "layout", "norma", "engenharia"]):
+        return "technical_agent"
+    if any(word in text for word in ["contrato", "jurídico", "compliance", "documento", "norma", "rdo", "abnt"]):
+        return "compliance_agent"
+    return "sdr_agent"
+
+
+def fallback_analysis(event: LeadEvent, specialist: str) -> Dict[str, Any]:
+    msg = event.message.lower()
+    intent = "interesse_inicial"
+    urgency_score = 50
+    next_action = "Criar tarefa de follow-up consultivo no Pipedrive e preparar resposta para aprovação."
+
+    if any(w in msg for w in ["orçamento", "preço", "valor", "proposta"]):
+        intent = "pedido_de_orcamento"
+        urgency_score = 85
+        next_action = "Solicitar dados mínimos para diagnóstico e propor reunião rápida."
+    elif any(w in msg for w in ["reunião", "agenda", "conversar", "call"]):
+        intent = "pedido_de_reuniao"
+        urgency_score = 90
+        next_action = "Sugerir horários e registrar atividade de reunião no Pipedrive."
+    elif any(w in msg for w in ["não", "sem interesse", "agora não"]):
+        intent = "objeção_ou_desinteresse"
+        urgency_score = 35
+        next_action = "Responder com baixo atrito e manter nutrição futura."
+
+    reply = (
+        f"Olá{f' {event.lead_name}' if event.lead_name else ''}, obrigado pelo retorno. "
+        "Antes de avançarmos com qualquer proposta, o ideal é entender rapidamente o contexto da sua operação "
+        "para indicarmos uma solução coerente, sem superdimensionar custo nem escopo. "
+        "Podemos seguir com um diagnóstico inicial?"
+    )
+
+    return {
+        "intent": intent,
+        "urgency_score": urgency_score,
+        "next_action": next_action,
+        "reply_ptbr": reply,
+        "deal_label": intent,
+        "specialist": specialist,
+        "analysis_source": "fallback_local",
+    }
+
+
+def analyze_with_openai(event: LeadEvent, specialist: str) -> Dict[str, Any]:
+    if not OPENAI_API_KEY:
+        return fallback_analysis(event, specialist)
+
+    system_prompt = f"""
+Você é um agente especialista do Grupo Pedra.
+Especialista ativo: {specialist}
+
+Contexto:
+- Grupo Pedra atua com engenharia, infraestrutura, concessionárias de caminhões, Pedra Tech e automação de pós-venda.
+- A resposta nunca deve ser enviada automaticamente. Ela será apenas um rascunho para aprovação humana.
+- Seja consultivo, objetivo e comercialmente inteligente.
+- Retorne APENAS JSON válido.
+
+Campos obrigatórios:
+intent, urgency_score, next_action, reply_ptbr, deal_label, specialist
+"""
+
+    user_prompt = {
+        "lead_email": event.lead_email,
+        "lead_name": event.lead_name,
+        "company_name": event.company_name,
+        "message": event.message,
+        "source": event.source,
+    }
+
+    try:
+        resp = requests.post(
+            "https://api.openai.com/v1/responses",
+            headers={
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": OPENAI_MODEL,
+                "input": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": json.dumps(user_prompt, ensure_ascii=False)},
+                ],
+                "temperature": 0.2,
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        text = data.get("output_text", "")
+        parsed = json.loads(text)
+        parsed["analysis_source"] = "openai"
+        return parsed
+    except Exception as exc:
+        fallback = fallback_analysis(event, specialist)
+        fallback["openai_error"] = str(exc)
+        return fallback
+
+
+def pipedrive_request(method: str, path: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    if not PIPEDRIVE_API_KEY:
+        return {"ok": False, "status": "missing_pipedrive_key"}
+
+    url = f"{PIPEDRIVE_BASE_URL}{path}"
+    params = {"api_token": PIPEDRIVE_API_KEY}
+
+    try:
+        resp = requests.request(method, url, params=params, json=payload, timeout=30)
+        return {
+            "ok": resp.ok,
+            "status_code": resp.status_code,
+            "response": resp.json() if resp.content else None,
+        }
+    except Exception as exc:
+        return {"ok": False, "status": "request_failed", "error": str(exc)}
+
+
+def sync_pipedrive(event: LeadEvent, analysis: Dict[str, Any]) -> Dict[str, Any]:
+    person_payload = {
+        "name": event.lead_name or event.lead_email,
+        "email": [{"value": event.lead_email, "primary": True}],
+        "org_name": event.company_name or "",
+    }
+    person = pipedrive_request("POST", "/v1/persons", person_payload)
+    person_id = None
+    try:
+        person_id = person["response"]["data"]["id"]
+    except Exception:
+        pass
+
+    deal_payload = {
+        "title": f"{event.company_name or event.lead_email} - {analysis.get('intent', 'novo_lead')}",
+        "person_id": person_id,
+        "status": "open",
+    }
+    deal = pipedrive_request("POST", "/v1/deals", deal_payload)
+    deal_id = None
+    try:
+        deal_id = deal["response"]["data"]["id"]
+    except Exception:
+        pass
+
+    note_payload = {
+        "content": (
+            f"<b>Lead analisado por IA</b><br>"
+            f"Especialista: {analysis.get('specialist')}<br>"
+            f"Intenção: {analysis.get('intent')}<br>"
+            f"Score: {analysis.get('urgency_score')}<br>"
+            f"Próxima ação: {analysis.get('next_action')}<br>"
+            f"Mensagem original: {event.message}<br>"
+            f"Rascunho pendente de aprovação: {analysis.get('reply_ptbr')}"
+        ),
+        "deal_id": deal_id,
+        "person_id": person_id,
+    }
+    note = pipedrive_request("POST", "/v1/notes", note_payload)
+
+    activity_payload = {
+        "subject": f"Aprovar resposta IA - {analysis.get('intent')}",
+        "type": "task",
+        "done": 0,
+        "person_id": person_id,
+        "deal_id": deal_id,
+        "note": analysis.get("next_action"),
+    }
+    activity = pipedrive_request("POST", "/v1/activities", activity_payload)
+
+    return {
+        "person": person,
+        "deal": deal,
+        "note": note,
+        "activity": activity,
+        "person_id": person_id,
+        "deal_id": deal_id,
+    }
+
+
+def queue_approval(event: LeadEvent, analysis: Dict[str, Any], pipedrive_result: Dict[str, Any]) -> Dict[str, Any]:
+    approval = {
+        "approval_id": str(uuid.uuid4()),
+        "status": "pending",
+        "created_at": now_iso(),
+        "lead": event.model_dump(),
+        "analysis": analysis,
+        "pipedrive": {
+            "person_id": pipedrive_result.get("person_id"),
+            "deal_id": pipedrive_result.get("deal_id"),
+        },
+    }
+    append_jsonl(APPROVALS_FILE, approval)
+    return approval
+
+
+def send_lemlist_reply(approval: Dict[str, Any], reply: str) -> Dict[str, Any]:
+    if not LEMLIST_API_KEY:
+        return {"ok": False, "status": "missing_lemlist_key"}
+
+    lead_email = approval["lead"]["lead_email"]
+    campaign_id = approval["lead"].get("campaign_id") or LEMLIST_CAMPAIGN_ID
+
+    if not campaign_id:
+        return {"ok": False, "status": "missing_lemlist_campaign_id"}
+
+    # Observação: confirme o endpoint exato conforme sua conta/API Lemlist.
+    # Este MVP centraliza a chamada para facilitar ajuste fino.
+    url = f"{LEMLIST_BASE_URL}/api/campaigns/{campaign_id}/leads/{lead_email}/activities"
+    payload = {
+        "type": "manualReply",
+        "text": reply,
+    }
+
+    try:
+        resp = requests.post(
+            url,
+            auth=("", LEMLIST_API_KEY),
+            json=payload,
+            timeout=30,
+        )
+        return {
+            "ok": resp.ok,
+            "status_code": resp.status_code,
+            "response": resp.json() if resp.content else None,
+        }
+    except Exception as exc:
+        return {"ok": False, "status": "request_failed", "error": str(exc)}
+
+
+def process_event(event: LeadEvent) -> Dict[str, Any]:
+    specialist = choose_specialist(event.message)
+    analysis = analyze_with_openai(event, specialist)
+    pipedrive_result = sync_pipedrive(event, analysis)
+    approval = queue_approval(event, analysis, pipedrive_result)
+
+    result = {
+        "ok": True,
+        "message": "Lead processado. Resposta ficou pendente para aprovação humana.",
+        "approval_id": approval["approval_id"],
+        "specialist": specialist,
+        "analysis": analysis,
+        "pipedrive": pipedrive_result,
+        "approval_status": "pending",
+    }
+    append_jsonl(LOG_FILE, {"created_at": now_iso(), "type": "process_event", "result": result})
+    return result
+
+
+@app.get("/health")
+def health() -> Dict[str, Any]:
+    return {
+        "ok": True,
+        "app": APP_NAME,
+        "time": now_iso(),
+        "env": {
+            "openai_configured": bool(OPENAI_API_KEY),
+            "pipedrive_configured": bool(PIPEDRIVE_API_KEY),
+            "lemlist_configured": bool(LEMLIST_API_KEY),
+            "lemlist_campaign_configured": bool(LEMLIST_CAMPAIGN_ID),
+        },
+    }
+
+
+@app.post("/simulate")
+def simulate(event: LeadEvent) -> Dict[str, Any]:
+    return process_event(event)
+
+
+@app.post("/webhooks/lemlist")
+def lemlist_webhook(event: LeadEvent, x_webhook_token: Optional[str] = Header(default=None)) -> Dict[str, Any]:
+    if LEMLIST_WEBHOOK_TOKEN and x_webhook_token != LEMLIST_WEBHOOK_TOKEN:
+        raise HTTPException(status_code=401, detail="Webhook token inválido")
+    return process_event(event)
+
+
+@app.get("/approvals")
+def list_approvals(status: Optional[str] = "pending") -> Dict[str, Any]:
+    approvals = read_jsonl(APPROVALS_FILE)
+    if status:
+        approvals = [a for a in approvals if a.get("status") == status]
+    return {"ok": True, "total": len(approvals), "items": approvals}
+
+
+@app.post("/approvals/decision")
+def approval_decision(decision: ApprovalDecision) -> Dict[str, Any]:
+    approvals = read_jsonl(APPROVALS_FILE)
+    selected = None
+    for item in approvals:
+        if item.get("approval_id") == decision.approval_id:
+            selected = item
+            break
+
+    if not selected:
+        raise HTTPException(status_code=404, detail="approval_id não encontrado")
+
+    if selected.get("status") != "pending":
+        return {"ok": False, "message": "Este item já foi decidido.", "approval": selected}
+
+    normalized = decision.decision.strip().lower()
+    if normalized not in ["approve", "reject"]:
+        raise HTTPException(status_code=400, detail="decision deve ser approve ou reject")
+
+    reply = decision.edited_reply or selected["analysis"].get("reply_ptbr", "")
+
+    lemlist_result = None
+    if normalized == "approve":
+        lemlist_result = send_lemlist_reply(selected, reply)
+
+    selected["status"] = "approved" if normalized == "approve" else "rejected"
+    selected["decided_at"] = now_iso()
+    selected["reviewer"] = decision.reviewer
+    selected["final_reply"] = reply
+    selected["lemlist_result"] = lemlist_result
+
+    # Regrava fila inteira de forma simples para MVP.
+    with open(APPROVALS_FILE, "w", encoding="utf-8") as f:
+        for item in approvals:
+            if item.get("approval_id") == decision.approval_id:
+                item = selected
+            f.write(json.dumps(item, ensure_ascii=False) + "\n")
+
+    append_jsonl(LOG_FILE, {"created_at": now_iso(), "type": "approval_decision", "approval": selected})
+    return {"ok": True, "message": "Decisão registrada.", "approval": selected}
+
+
+def lemlist_auth_headers():
+    api_key = os.getenv("LEMLIST_API_KEY")
+
+    if not api_key:
+        return None
+
+    token = base64.b64encode(f":{api_key}".encode("utf-8")).decode("utf-8")
+
+    return {
+        "Authorization": f"Basic {token}",
+        "Content-Type": "application/json",
+    }
+
+
+@app.get("/lemlist/campaigns")
+def list_lemlist_campaigns():
+    headers = lemlist_auth_headers()
+
+    if not headers:
+        return {
+            "ok": False,
+            "error": "missing_lemlist_api_key",
+            "campaigns": [],
+        }
+
+    base_url = os.getenv("LEMLIST_BASE_URL", "https://api.lemlist.com/api").rstrip("/")
+
+    try:
+        response = requests.get(
+            f"{base_url}/campaigns",
+            headers=headers,
+            timeout=30,
+        )
+
+        if response.status_code >= 400:
+            return {
+                "ok": False,
+                "status_code": response.status_code,
+                "error": response.text,
+                "campaigns": [],
+            }
+
+        data = response.json()
+
+        return {
+            "ok": True,
+            "total": len(data) if isinstance(data, list) else 1,
+            "campaigns": data,
+        }
+
+    except Exception as error:
+        return {
+            "ok": False,
+            "error": str(error),
+            "campaigns": [],
+        }
+
+
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard():
+    dashboard_path = "public/dashboard.html"
+
+    try:
+        with open(dashboard_path, "r", encoding="utf-8") as file:
+            return file.read()
+    except FileNotFoundError:
+        return "<h1>Dashboard não encontrado</h1><p>Crie o arquivo public/dashboard.html.</p>"

@@ -1,0 +1,13 @@
+{
+  "lemlist_open_rate": 45,
+  "lemlist_reply_rate": 8,
+  "lemlist_positive_reply_rate": 3,
+  "lemlist_meeting_rate": 1.5,
+  "pipedrive_lead_to_opportunity_rate": 12,
+  "pipedrive_opportunity_to_win_rate": 20,
+  "pipedrive_average_cycle_days": 45,
+  "pipedrive_activities_per_deal": 4,
+  "pipedrive_max_overdue_activity_rate": 5,
+  "pipedrive_expected_average_deal_value": 150000,
+  "description": "Benchmarks configuráveis do Grupo Pedra. Ajustar conforme nicho, público e maturidade da campanha."
+}

@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initInteligência Comerciall-scale=1.0" />
+  <title>Central Inteligência Comercial Grupo Pedra</title>
+  <style>
+    :root {
+      --black: #0b0b0d;
+      --dark: #18181b;
+      --gray: #3f3f46;
+      --soft: #f4f4f5;
+      --white: #ffffff;
+      --red: #c1121f;
+      --red2: #ef233c;
+      --green: #16a34a;
+      --yellow: #ca8a04;
+      --blue: #2563eb;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: ArInteligência Comerciall, Helvetica, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--soft);
+      color: var(--black);
+    }
+
+    header {
+      background: linear-gradient(135deg, #050505, #202024);
+      color: white;
+      padding: 26px 32px;
+      border-bottom: 5px solid var(--red);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      color: #d4d4d8;
+    }
+
+    main {
+      max-width: 1500px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      border: 0;
+      background: var(--red);
+      color: white;
+      padding: 11px 15px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .btn.secondary {
+      background: var(--black);
+    }
+
+    .btn:hover {
+      background: var(--red2);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: white;
+      padding: 11px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .tab-btn.active {
+      background: var(--black);
+      color: white;
+      border-color: var(--red);
+      box-shadow: 0 8px 18px rgba(193, 18, 31, 0.22);
+    }
+
+    .tab {
+      display: none;
+    }
+
+    .tab.active {
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .card, .panel {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 10px 24px rgba(15, 15, 16, 0.08);
+      border: 1px solid var(--border);
+    }
+
+    .card.dark {
+      background: var(--black);
+      color: white;
+      border-bottom: 5px solid var(--red);
+    }
+
+    .card h3 {
+      margin: 0;
+      color: #71717a;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .card.dark h3 {
+      color: #d4d4d8;
+    }
+
+    .number {
+      font-size: 34px;
+      font-weight: 900;
+      margin-top: 8px;
+    }
+
+    .muted {
+      color: #71717a;
+      font-size: 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .Em andamento, .Aprovado, .ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .Pausada, .Aguardando aprovação, .Aprovado para criação {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .Rascunho {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .Rejeitado, .pending {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .table-wrap {
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #fafafa;
+      color: #52525b;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+
+    tr:hover {
+      background: #fff1f2;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      margin-top: 6px;
+      margin-bottom: 12px;
+    }
+
+    textarea {
+      min-height: 110px;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: -500px;
+      width: 480px;
+      max-width: 92vw;
+      height: 100vh;
+      background: white;
+      box-shadow: -10px 0 30px rgba(0,0,0,0.2);
+      padding: 24px;
+      transition: 0.2s;
+      z-index: 99;
+      overflow: auto;
+      border-left: 5px solid var(--red);
+    }
+
+    .drawer.open {
+      right: 0;
+    }
+
+    .drawer-close {
+      float: right;
+      background: var(--black);
+      color: white;
+      border: 0;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+
+    .insight {
+      border-left: 5px solid var(--red);
+      padding: 14px;
+      background: #fafafa;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      background: #111;
+      color: #f4f4f5;
+      padding: 12px;
+      border-radius: 12px;
+      overflow: auto;
+      font-size: 12px;
+    }
+
+    @medInteligência Comercial (max-width: 950px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    @medInteligência Comercial (max-width: 600px) {
+      main { padding: 14px; }
+      .grid { grid-template-columns: 1fr; }
+      header { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+  <div class="brand-header">
+    <img src="/public/logo-grupo-pedra.png" alt="Logo Grupo Pedra" class="brand-logo" />
+    <div>
+      <h1>Central ComercInteligência Comerciall Inteligente | Grupo Pedra</h1>
+      <p>Campanhas, agentes, tarefas, atividades, respostas, aprovação humana e controle de acessos.</p>
+    </div>
+  </div>
+</header>
+
+  <main>
+    <div class="toolbar">
+      <div>
+        <strong>Centro de comando interno</strong>
+        <div class="muted">Tudo que a Inteligência Comercial crInteligência Comercialr fica pendente até aprovação de Jaasiel.</div>
+      </div>
+      <button class="btn" onclick="loadAll()">Atualizar central</button>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab-btn active" onclick="showTab('geral', this)">Geral</button>
+      <button class="tab-btn" onclick="showTab('centralInteligência Comercial', this)">Central Inteligência Comercial</button>
+      <button class="tab-btn" onclick="showTab('crInteligência ComercialrCampanha', this)">CrInteligência Comercialr Campanha Inteligência Comercial</button>
+      <button class="tab-btn" onclick="showTab('crInteligência ComercialrAgente', this)">CrInteligência Comercialr Agentes</button>
+      <button class="tab-btn" onclick="showTab('aprovacoes', this)">Aprovações</button>
+      <button class="tab-btn" onclick="showTab('login', this)">Login e Acessos</button>
+    </nav>
+
+    <section id="geral" class="tab active">
+      <div class="grid">
+        <div class="card dark"><h3>Campanhas Lemlist</h3><div id="kpiCampaigns" class="number">-</div></div>
+        <div class="card"><h3>Respostas pendentes</h3><div id="kpiReplies" class="number">-</div></div>
+        <div class="card"><h3>Agentes Inteligência Comercial</h3><div id="kpInteligência Comercialgents" class="number">-</div></div>
+        <div class="card"><h3>Campanhas Inteligência Comercial</h3><div id="kpiRascunhos" class="number">-</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Resumo operacional</h2>
+          <div id="summaryBox">Carregando...</div>
+        </div>
+
+        <div class="panel">
+          <h2>Próximas ações recomendadas</h2>
+          <div class="insight">1. CrInteligência Comercialr agentes por especInteligência Comerciallidade: comercInteligência Comerciall, engenharInteligência Comercial, Pedra Tech, mensagens e SDR.</div>
+          <div class="insight">2. Gerar campanhas com Inteligência Comercial e aprovar somente as que tiverem estratégInteligência Comercial clara.</div>
+          <div class="insight">3. Medir o que vira oportunidade no Pipedrive, não apenas resposta no Lemlist.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="centralInteligência Comercial" class="tab">
+      <div class="panel">
+        <h2>Campanhas, tarefas e atividades analisadas pela Inteligência Comercial</h2>
+        <p class="muted">Aqui aparece a visão consolidada: campanhas Lemlist, respostas pendentes, negócios e atividades do Pipedrive.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Origem</th>
+                <th>Nome/Título</th>
+                <th>Status</th>
+                <th>Inteligência Comercial/Agente</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="centralInteligência ComercialTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="crInteligência ComercialrCampanha" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Gerar nova campanha para Lemlist com Inteligência Comercial</h2>
+
+          <label>Objetivo da campanha</label>
+          <textarea id="campaignObjective" placeholder="Ex: gerar reuniões com gerentes de pós-venda de concessionárInteligência Comercials de caminhões."></textarea>
+
+          <label>Público-alvo</label>
+          <input id="campaignAudience" placeholder="Ex: gerentes e diretores de pós-venda Volvo, ScanInteligência Comercial, Iveco..." />
+
+          <label>Oferta</label>
+          <input id="campaignOffer" placeholder="Ex: dInteligência Comercialgnóstico técnico da infraestrutura de pós-venda." />
+
+          <label>Dores principais</label>
+          <textarea id="campaignPain" placeholder="Ex: oficina travada, layout ruim, troca de óleo ineficiente, separadora inadequada..."></textarea>
+
+          <label>Agente responsável</label>
+          <select id="campaignAgent"></select>
+
+          <button class="btn" onclick="createCampaignRascunho()">Gerar campanha para aprovação</button>
+        </div>
+
+        <div class="panel">
+          <h2>Rascunhos de campanhas Inteligência Comercial</h2>
+          <div id="campaignRascunhosBox">Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="crInteligência ComercialrAgente" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>CrInteligência Comercialr novo agente Inteligência Comercial</h2>
+
+          <label>Nome do agente</label>
+          <input id="agentName" placeholder="Ex: Agente Pós-Venda Volvo" />
+
+          <label>EspecInteligência Comerciallidade</label>
+          <input id="agentSpecInteligência Comerciallty" placeholder="Ex: infraestrutura de pós-venda e concessionárInteligência Comercials de caminhões" />
+
+          <label>Instruções do agente</label>
+          <textarea id="agentInstructions" placeholder="Explique como esse agente deve analisar leads, campanhas e respostas."></textarea>
+
+          <button class="btn" onclick="createAgent()">CrInteligência Comercialr agente para aprovação</button>
+        </div>
+
+        <div class="panel">
+          <h2>Agentes cadastrados</h2>
+          <div id="agentsBox">Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="aprovacoes" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Agentes aguardando aprovação</h2>
+          <div id="pendingAgentsBox">Carregando...</div>
+        </div>
+
+        <div class="panel">
+          <h2>Campanhas Inteligência Comercial aguardando aprovação</h2>
+          <div id="pendingRascunhosBox">Carregando...</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="login" class="tab">
+      <div class="grid-2">
+        <div class="panel">
+          <h2>Registrar acesso</h2>
+
+          <label>Quem acessou?</label>
+          <select id="loginName">
+            <option value="Jaasiel Gomes">Jaasiel Gomes</option>
+            <option value="Davi Vilela">Davi Vilela</option>
+            <option value="Estagiário">Estagiário</option>
+          </select>
+
+          <label>Perfil</label>
+          <select id="loginRole">
+            <option value="gestor">Gestor</option>
+            <option value="marketing_comercInteligência Comerciall">Marketing/ComercInteligência Comerciall</option>
+            <option value="estagInteligência Comercialrio">Estagiário</option>
+          </select>
+
+          <button class="btn" onclick="registerLogin()">Registrar entrada</button>
+        </div>
+
+        <div class="panel">
+          <h2>Histórico de acessos</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Perfil</th>
+                  <th>Data/Hora</th>
+                </tr>
+              </thead>
+              <tbody id="accessLogTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside id="drawer" class="drawer">
+    <button class="drawer-close" onclick="closeDrawer()">Fechar</button>
+    <div id="drawerContent"></div>
+  </aside>
+
+  <script>
+    let state = {
+      campaigns: [],
+      replies: [],
+      agents: [],
+      Rascunhos: [],
+      accessLogs: [],
+      deals: [],
+      activities: []
+    };
+
+    function showTab(id, button) {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      button.classList.add("active");
+    }
+
+    async function fetchdados técnicos(url, options = {}) {
+      const response = await fetch(url, options);
+      return await response.dados técnicos();
+    }
+
+    function badge(status) {
+      return `<span class="badge ${status || 'Rascunho'}">${status || '-'}</span>`;
+    }
+
+    function fmtDate(v) {
+      if (!v) return "-";
+      try { return new Date(v).toLocaleString("pt-BR"); } catch { return v; }
+    }
+
+    function openDrawer(title, content) {
+      document.getElementById("drawerContent").innerHTML = `<h2>${title}</h2>${content}`;
+      document.getElementById("drawer").classList.add("open");
+    }
+
+    function closeDrawer() {
+      document.getElementById("drawer").classList.remove("open");
+    }
+
+    async function loadAll() {
+      try {
+        const overview = await fetchdados técnicos("/ai-control/overview");
+
+        state.campaigns = overview.lemlist_campaigns?.campaigns || [];
+        state.replies = overview.pending_replies?.approvals || overview.pending_replies?.items || overview.pending_replies?.data || [];
+        state.agents = overview.agents || [];
+        state.Rascunhos = overview.campaign_Rascunhos || [];
+        state.accessLogs = overview.access_logs || [];
+        state.deals = overview.pipedrive?.deals?.data || [];
+        state.activities = overview.pipedrive?.activities?.data || [];
+
+        document.getElementById("kpiCampaigns").innerText = state.campaigns.length;
+        document.getElementById("kpiReplies").innerText = state.replies.length;
+        document.getElementById("kpInteligência Comercialgents").innerText = state.agents.length;
+        document.getElementById("kpiRascunhos").innerText = state.Rascunhos.length;
+
+        renderSummary();
+        renderCentralInteligência Comercial();
+        renderAgents();
+        renderCampaignRascunhos();
+        renderApprovals();
+        renderAccessLogs();
+        fillAgentSelect();
+
+      } catch (error) {
+        alert("Erro ao carregar central: " + error);
+      }
+    }
+
+    function renderSummary() {
+      const Em andamento = state.campaigns.filter(c => c.status === "Em andamento").length;
+      const pendingAgents = state.agents.filter(a => a.status === "Aguardando aprovação").length;
+      const pendingRascunhos = state.Rascunhos.filter(d => d.status === "Aguardando aprovação").length;
+
+      document.getElementById("summaryBox").innerHTML = `
+        <div class="insight"><strong>Lemlist:</strong> ${state.campaigns.length} campanhas encontradas, ${Em andamento} rodando.</div>
+        <div class="insight"><strong>Inteligência Comercial:</strong> ${state.replies.length} respostas pendentes de aprovação.</div>
+        <div class="insight"><strong>Agentes:</strong> ${state.agents.length} agentes crInteligência Comercialdos, ${pendingAgents} aguardando aprovação.</div>
+        <div class="insight"><strong>Campanhas Inteligência Comercial:</strong> ${state.Rascunhos.length} rascunhos crInteligência Comercialdos, ${pendingRascunhos} aguardando aprovação.</div>
+        <div class="insight"><strong>Pipedrive:</strong> ${state.deals.length} negócios e ${state.activities.length} atividades carregadas.</div>
+      `;
+    }
+
+    function renderCentralInteligência Comercial() {
+      const rows = [];
+
+      state.campaigns.forEach(c => rows.push({
+        origin: "Lemlist",
+        title: c.name,
+        status: c.status,
+        agent: "Agente de campanha",
+        action: "Analisar campanha e comparar com mercado",
+        raw: c
+      }));
+
+      state.deals.forEach(d => rows.push({
+        origin: "Pipedrive - Negócio",
+        title: d.title,
+        status: d.status,
+        agent: "GPedra ComercInteligência Comerciall",
+        action: "Analisar oportunidade e próxima tarefa",
+        raw: d
+      }));
+
+      state.activities.forEach(a => rows.push({
+        origin: "Pipedrive - Atividade",
+        title: a.subject,
+        status: a.done ? "feita" : "pendente",
+        agent: "SDR/ComercInteligência Comerciall",
+        action: "Analisar atividade e prazo",
+        raw: a
+      }));
+
+      state.replies.forEach(r => rows.push({
+        origin: "Inteligência Comercial - Resposta",
+        title: r.lead_name || r.lead_email || r.approval_id,
+        status: r.status || "pending",
+        agent: r.specInteligência Comerciallist || "Agente Inteligência Comercial",
+        action: "Aprovar ou editar resposta",
+        raw: r
+      }));
+
+      document.getElementById("centralInteligência ComercialTable").innerHTML = rows.map((r, i) => `
+        <tr onclick='openDrawer("${r.origin}", "<p><strong>${r.title || "-"}</strong></p><p>Status: ${r.status || "-"}</p><p>Ação: ${r.action}</p><pre>${dados técnicos.stringify(r.raw, null, 2).replace(/"/g, "&quot;")}</pre>")'>
+          <td>${r.origin}</td>
+          <td><strong>${r.title || "-"}</strong></td>
+          <td>${badge(r.status)}</td>
+          <td>${r.agent}</td>
+          <td>${r.action}</td>
+        </tr>
+      `).join("");
+    }
+
+    function fillAgentSelect() {
+      const Aprovado = state.agents.filter(a => a.status === "Aprovado");
+      const baseOptions = [
+        `<option value="gpedra_comercInteligência Comerciall">GPedra ComercInteligência Comerciall</option>`,
+        `<option value="gpedra_engenharInteligência Comercial">GPedra EngenharInteligência Comercial</option>`,
+        `<option value="gpedra_tech">GPedra Tech</option>`,
+        `<option value="gmarket">GMarket</option>`
+      ];
+
+      const customOptions = Aprovado.map(a => `<option value="${a.agent_id}">${a.name}</option>`);
+
+      document.getElementById("campaignAgent").innerHTML = [...baseOptions, ...customOptions].join("");
+    }
+
+    async function createCampaignRascunho() {
+      const payload = {
+        objective: document.getElementById("campaignObjective").value,
+        target_audience: document.getElementById("campaignAudience").value,
+        offer: document.getElementById("campaignOffer").value,
+        pain_points: document.getElementById("campaignPain").value,
+        agent_id: document.getElementById("campaignAgent").value,
+        created_by: "Jaasiel"
+      };
+
+      const result = await fetchdados técnicos("/ai/campaign-Rascunhos", {
+        method: "POST",
+        headers: {"Content-Type": "application/dados técnicos"},
+        body: dados técnicos.stringify(payload)
+      });
+
+      openDrawer("Campanha Inteligência Comercial crInteligência Comercialda", `<pre>${dados técnicos.stringify(result, null, 2)}</pre>`);
+      loadAll();
+    }
+
+    async function createAgent() {
+      const payload = {
+        name: document.getElementById("agentName").value,
+        specInteligência Comerciallty: document.getElementById("agentSpecInteligência Comerciallty").value,
+        instructions: document.getElementById("agentInstructions").value,
+        created_by: "Jaasiel"
+      };
+
+      const result = await fetchdados técnicos("/ai-agents", {
+        method: "POST",
+        headers: {"Content-Type": "application/dados técnicos"},
+        body: dados técnicos.stringify(payload)
+      });
+
+      openDrawer("Agente crInteligência Comercialdo", `<pre>${dados técnicos.stringify(result, null, 2)}</pre>`);
+      loadAll();
+    }
+
+    function renderAgents() {
+      document.getElementById("agentsBox").innerHTML = state.agents.length ? state.agents.map(a => `
+        <div class="insight">
+          <strong>${a.name}</strong> ${badge(a.status)}
+          <p>${a.specInteligência Comerciallty}</p>
+          <button class="btn secondary" onclick='openDrawer("${a.name}", "<pre>${dados técnicos.stringify(a, null, 2).replace(/"/g, "&quot;")}</pre>")'>Ver detalhes</button>
+        </div>
+      `).join("") : `<div class="insight">Nenhum agente personalizado crInteligência Comercialdo ainda.</div>`;
+    }
+
+    function renderCampaignRascunhos() {
+      document.getElementById("campaignRascunhosBox").innerHTML = state.Rascunhos.length ? state.Rascunhos.map(d => `
+        <div class="insight">
+          <strong>${d.objective}</strong> ${badge(d.status)}
+          <p><strong>Público:</strong> ${d.target_audience}</p>
+          <button class="btn secondary" onclick='openDrawer("Rascunho de campanha", "<pre>${dados técnicos.stringify(d, null, 2).replace(/"/g, "&quot;")}</pre>")'>Ver rascunho</button>
+        </div>
+      `).join("") : `<div class="insight">Nenhuma campanha Inteligência Comercial crInteligência Comercialda ainda.</div>`;
+    }
+
+    function renderApprovals() {
+      const pendingAgents = state.agents.filter(a => a.status === "Aguardando aprovação");
+      const pendingRascunhos = state.Rascunhos.filter(d => d.status === "Aguardando aprovação");
+
+      document.getElementById("pendingAgentsBox").innerHTML = pendingAgents.length ? pendingAgents.map(a => `
+        <div class="insight">
+          <strong>${a.name}</strong>
+          <p>${a.specInteligência Comerciallty}</p>
+          <button class="btn" onclick="decideAgent('${a.agent_id}', 'approve')">Aprovar agente</button>
+          <button class="btn secondary" onclick="decideAgent('${a.agent_id}', 'reject')">Rejeitar</button>
+        </div>
+      `).join("") : `<div class="insight">Nenhum agente pendente.</div>`;
+
+      document.getElementById("pendingRascunhosBox").innerHTML = pendingRascunhos.length ? pendingRascunhos.map(d => `
+        <div class="insight">
+          <strong>${d.objective}</strong>
+          <p>${d.target_audience}</p>
+          <button class="btn" onclick="decideRascunho('${d.Rascunho_id}', 'approve')">Aprovar campanha</button>
+          <button class="btn secondary" onclick="decideRascunho('${d.Rascunho_id}', 'reject')">Rejeitar</button>
+        </div>
+      `).join("") : `<div class="insight">Nenhuma campanha Inteligência Comercial pendente.</div>`;
+    }
+
+    async function decideAgent(agentId, decision) {
+      const result = await fetchdados técnicos("/ai-agents/decision", {
+        method: "POST",
+        headers: {"Content-Type": "application/dados técnicos"},
+        body: dados técnicos.stringify({agent_id: agentId, decision, reviewer: "Jaasiel"})
+      });
+
+      openDrawer("Decisão do agente", `<pre>${dados técnicos.stringify(result, null, 2)}</pre>`);
+      loadAll();
+    }
+
+    async function decideRascunho(RascunhoId, decision) {
+      const result = await fetchdados técnicos("/ai/campaign-Rascunhos/decision", {
+        method: "POST",
+        headers: {"Content-Type": "application/dados técnicos"},
+        body: dados técnicos.stringify({Rascunho_id: RascunhoId, decision, reviewer: "Jaasiel"})
+      });
+
+      openDrawer("Decisão da campanha", `<pre>${dados técnicos.stringify(result, null, 2)}</pre>`);
+      loadAll();
+    }
+
+    async function registerLogin() {
+      const payload = {
+        name: document.getElementById("loginName").value,
+        role: document.getElementById("loginRole").value
+      };
+
+      const result = await fetchdados técnicos("/auth/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/dados técnicos"},
+        body: dados técnicos.stringify(payload)
+      });
+
+      openDrawer("Acesso registrado", `<pre>${dados técnicos.stringify(result, null, 2)}</pre>`);
+      loadAll();
+    }
+
+    function renderAccessLogs() {
+      document.getElementById("accessLogTable").innerHTML = state.accessLogs.length ? state.accessLogs.slice().reverse().map(l => `
+        <tr>
+          <td>${l.name}</td>
+          <td>${l.role}</td>
+          <td>${fmtDate(l.accessed_at)}</td>
+        </tr>
+      `).join("") : `<tr><td colspan="3">Nenhum acesso registrado ainda.</td></tr>`;
+    }
+
+    loadAll();
+  </script>
+</body>
+</html>
+
+
+

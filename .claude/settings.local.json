@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d[:2], ensure_ascii=False, indent=2\\)\\)\")",
+      "mcp__Claude_Preview__preview_start",
+      "PowerShell(& \"C:\\\\Users\\\\Usuario\\\\Desktop\\\\internal-sales-automation\\\\.venv\\\\Scripts\\\\python.exe\" -m uvicorn --version 2>&1)",
+      "mcp__8cc079f0-b42a-4f1d-b04c-7321440a7638__get_campaigns",
+      "mcp__8cc079f0-b42a-4f1d-b04c-7321440a7638__get_campaigns_stats",
+      "mcp__pipedrive__list_deals",
+      "mcp__8cc079f0-b42a-4f1d-b04c-7321440a7638__search_campaign_leads",
+      "mcp__8cc079f0-b42a-4f1d-b04c-7321440a7638__get_inbox_conversations",
+      "PowerShell(& \"C:\\\\Users\\\\Usuario\\\\Desktop\\\\internal-sales-automation\\\\.venv\\\\Scripts\\\\pip.exe\" install openai -q)",
+      "PowerShell(Get-ChildItem \"G:\\\\Meu Drive\" -Recurse -Directory | Where-Object { $_.Name -match \"squad|agent|pedra|sofia|obsidian\" -or $_.Name -match \"Squad|Agent|Pedra|Sofia|Obsidian\" } | Select-Object FullName | Select-Object -First 20)",
+      "Bash(gh --version)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(gh repo *)",
+      "Bash(git push *)",
+      "Bash(Remove-Item -Recurse -Force .git)"
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+[
+  {
+    "draft_id": "f84ff170-1117-4cd4-acf7-728fb85cea4c",
+    "type": "lemlist_campaign_draft",
+    "objective": "",
+    "target_audience": "gerente de pos vendas",
+    "offer": "",
+    "pain_points": "fluxo travado",
+    "tone": "consultivo, técnico e comercial",
+    "agent_id": "gpedra_comercial",
+    "created_by": "Jaasiel",
+    "status": "pending_approval",
+    "created_at": "2026-05-04T23:10:00.137441+00:00",
+    "ai_result": {
+      "campaign_name": "Campanha IA - gerente de pos vendas",
+      "strategy_summary": "Falha ao chamar OpenAI. Rascunho fallback criado.",
+      "error": "{\n  \"error\": {\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.\",\n    \"type\": \"insufficient_quota\",\n    \"param\": null,\n    \"code\": \"insufficient_quota\"\n  }\n}",
+      "messages": [],
+      "approval_notes": "Aguardando aprovação."
+    },
+    "reviewed_by": null,
+    "reviewed_at": null
+  }
+]

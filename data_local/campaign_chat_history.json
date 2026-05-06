@@ -1,0 +1,16 @@
+[
+  {
+    "chat_id": "41b6e177-3481-4d00-9370-8e526bdb58b4",
+    "topic": "lemlist_pipedrive",
+    "message": "como está as 4 ultimas campanhas inclusive as que etsao rodando\n",
+    "answer": "Não foi possível gerar a resposta dos agentes. Erro: {\n  \"error\": {\n    \"message\": \"You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.\",\n    \"type\": \"insufficient_quota\",\n    \"param\": null,\n    \"code\": \"insufficient_quota\"\n  }\n}",
+    "created_by": "Jaasiel",
+    "created_at": "2026-05-04T21:13:09.567408+00:00",
+    "context_summary": {
+      "lemlist_available": true,
+      "pipedrive_available": true,
+      "commercial_comparison_available": true
+    },
+    "status": "conversation_only"
+  }
+]
