@@ -795,6 +795,42 @@ tr:hover td { background: #FAFAFA; }
 .btn-send:hover    { background: var(--red-dark); }
 .btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* Mic + Audio buttons */
+.btn-mic {
+  background: var(--gray-bg);
+  border: 1.5px solid var(--gray-border);
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.btn-mic:hover    { background: #FFF1F1; border-color: var(--red); }
+.btn-mic-active   { background: var(--red) !important; border-color: var(--red-dark) !important; animation: pulse-mic 0.8s infinite; }
+.btn-mic:disabled { opacity: 0.4; cursor: not-allowed; }
+
+@keyframes pulse-mic {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(225,38,28,0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(225,38,28,0); }
+}
+
+.btn-audio-toggle {
+  background: var(--gray-bg);
+  border: 1.5px solid var(--gray-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-audio-on  { border-color: #34D399; background: #F0FDF4; }
+.btn-audio-off { opacity: 0.5; }
+
 /* ── Pending Action Card (Sofia → Pipedrive) ─────────────────────── */
 .chat-text-wrap {
   display: flex;

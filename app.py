@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -412,6 +412,25 @@ def dashboard_full():
             "benchmarks": MOCK_DATA["benchmarks"],
         },
     }
+
+
+# ── Transcrição de áudio (Groq Whisper) ──────────────────────────
+
+@app.post("/transcribe")
+async def transcribe_audio(file: UploadFile = File(...)):
+    try:
+        audio_bytes = await file.read()
+        filename = file.filename or "audio.webm"
+        transcription = groq_client.audio.transcriptions.create(
+            file=(filename, audio_bytes, file.content_type or "audio/webm"),
+            model="whisper-large-v3-turbo",
+            language="pt",
+            response_format="text",
+        )
+        text = transcription if isinstance(transcription, str) else transcription.text
+        return {"ok": True, "text": text.strip()}
+    except Exception as e:
+        return {"ok": False, "text": "", "error": str(e)}
 
 
 # ── Sofia IA ─────────────────────────────────────────────────────
@@ -876,10 +895,13 @@ def sofia_chat(body: ChatMessage):
 
             label = "Criar Tarefa no Pipedrive" if fn == "criar_tarefa_pipedrive" else "Criar Negócio no Pipedrive"
             preview = args.get("subject") or args.get("title", "")
+            vencimento = ("\n\nVencimento: " + args["due_date"]) if args.get("due_date") else ""
+            nota = args.get("note", "")
+            reply_text = f"Identifiquei uma ação para executar no Pipedrive. Confirma?\n\n**{label}:** {preview}\n\n_{nota}_{vencimento}"
 
             return {
                 "ok":             True,
-                "reply":          f"Identifiquei uma ação para executar no Pipedrive. Confirma?\n\n**{label}:** {preview}\n\n_{args.get('note', '')}_{f\"\\n\\nVencimento: {args['due_date']}\" if args.get('due_date') else ''}",
+                "reply":          reply_text,
                 "pending_action": {"function": fn, "args": args, "label": label, "preview": preview},
             }
 

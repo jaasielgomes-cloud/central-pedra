@@ -46,9 +46,13 @@ export default function App() {
   const [sofiaMessages, setSofiaMessages] = useState([
     { role: 'assistant', text: 'Olá! Sou Sofia, Assistente Comercial IA do Grupo Pedra. Posso analisar campanhas, interpretar respostas de leads, sugerir próximas ações no CRM e gerar relatórios executivos. Como posso ajudar?' }
   ])
-  const [sofiaInput, setSofiaInput]   = useState('')
+  const [sofiaInput, setSofiaInput]     = useState('')
   const [sofiaLoading, setSofiaLoading] = useState(false)
-  const chatEndRef = useRef(null)
+  const [recording, setRecording]       = useState(false)
+  const [audioEnabled, setAudioEnabled] = useState(true)
+  const chatEndRef    = useRef(null)
+  const mediaRecRef   = useRef(null)
+  const chunksRef     = useRef([])
 
   const [consultaInput, setConsultaInput] = useState('')
   const [consultaResult, setConsultaResult] = useState(null)
@@ -104,14 +108,17 @@ export default function App() {
       if (!res.ok) throw new Error('HTTP ' + res.status)
       const json = await res.json()
       if (json.pending_action) {
+        const reply = json.reply || 'Quero executar uma ação no Pipedrive. Confirma?'
         setSofiaMessages(prev => [...prev, {
           role: 'assistant',
-          text: json.reply || 'Quero executar uma ação no Pipedrive. Confirma?',
+          text: reply,
           pendingAction: json.pending_action,
         }])
+        speakText(reply)
       } else {
         const reply = json.reply || json.message || json.response || 'Processado.'
         setSofiaMessages(prev => [...prev, { role: 'assistant', text: reply }])
+        speakText(reply)
       }
     } catch {
       setSofiaMessages(prev => [...prev, {
@@ -159,6 +166,60 @@ export default function App() {
       role: 'assistant',
       text: 'Tudo bem, ação cancelada. Como posso ajudar de outra forma?',
     }])
+  }
+
+  const speakText = (text) => {
+    if (!audioEnabled || !window.speechSynthesis) return
+    window.speechSynthesis.cancel()
+    const clean = text.replace(/\*\*/g, '').replace(/[_*#`]/g, '').substring(0, 500)
+    const utt = new SpeechSynthesisUtterance(clean)
+    utt.lang = 'pt-BR'
+    utt.rate = 1.05
+    utt.pitch = 1.0
+    const voices = window.speechSynthesis.getVoices()
+    const ptVoice = voices.find(v => v.lang.startsWith('pt'))
+    if (ptVoice) utt.voice = ptVoice
+    window.speechSynthesis.speak(utt)
+  }
+
+  const startRecording = async () => {
+    if (recording) return
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      chunksRef.current = []
+      const rec = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+      rec.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
+      rec.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop())
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
+        const form = new FormData()
+        form.append('file', blob, 'audio.webm')
+        setSofiaLoading(true)
+        try {
+          const res  = await fetch('/api/transcribe', { method: 'POST', body: form })
+          const json = await res.json()
+          if (json.ok && json.text) {
+            setSofiaInput(json.text)
+          }
+        } catch {
+          // silently fail — user can type manually
+        } finally {
+          setSofiaLoading(false)
+        }
+      }
+      mediaRecRef.current = rec
+      rec.start()
+      setRecording(true)
+    } catch {
+      alert('Permita acesso ao microfone nas configurações do navegador.')
+    }
+  }
+
+  const stopRecording = () => {
+    if (mediaRecRef.current && recording) {
+      mediaRecRef.current.stop()
+      setRecording(false)
+    }
   }
 
   const handleConsulta = () => {
@@ -789,13 +850,34 @@ export default function App() {
         </div>
 
         <div className="chat-input-row">
+          <button
+            className={`btn-mic ${recording ? 'btn-mic-active' : ''}`}
+            onMouseDown={startRecording}
+            onMouseUp={stopRecording}
+            onTouchStart={startRecording}
+            onTouchEnd={stopRecording}
+            title="Segure para falar"
+            disabled={sofiaLoading}
+          >
+            {recording ? '⏹' : '🎙'}
+          </button>
+
           <input
             value={sofiaInput}
             onChange={e => setSofiaInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && sendToSofia()}
-            placeholder="Pergunte para Sofia..."
+            placeholder={recording ? 'Gravando... solte para transcrever' : 'Pergunte para Sofia ou segure 🎙'}
             disabled={sofiaLoading}
           />
+
+          <button
+            className={`btn-audio-toggle ${audioEnabled ? 'btn-audio-on' : 'btn-audio-off'}`}
+            onClick={() => { window.speechSynthesis.cancel(); setAudioEnabled(v => !v) }}
+            title={audioEnabled ? 'Desativar voz da Sofia' : 'Ativar voz da Sofia'}
+          >
+            {audioEnabled ? '🔊' : '🔇'}
+          </button>
+
           <button
             className="btn-send"
             onClick={sendToSofia}
