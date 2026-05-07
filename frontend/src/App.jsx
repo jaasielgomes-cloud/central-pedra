@@ -32,9 +32,9 @@ const NAV = [
   { id: 'lemlist',   label: 'Lemlist',          icon: '✉' },
   { id: 'pipedrive', label: 'Pipedrive',        icon: '◎' },
   { id: 'relatorios',label: 'Relatórios',       icon: '▦' },
-  { id: 'acoes',     label: 'Ações do CRM',     icon: '⚡' },
-  { id: 'sofia',     label: 'Sofia IA',         icon: '◇' },
-  { id: 'consulta',  label: 'Consulta de Dados',icon: '⌕' },
+  { id: 'acoes',     label: 'Para Aprovar',      icon: '⚡' },
+  { id: 'sofia',     label: 'Sofia',             icon: '◇' },
+  { id: 'consulta',  label: 'Dados',             icon: '⌕' },
 ]
 
 export default function App() {
@@ -44,7 +44,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
 
   const [sofiaMessages, setSofiaMessages] = useState([
-    { role: 'assistant', text: 'Olá! Sou Sofia, Assistente Comercial IA do Grupo Pedra. Posso analisar campanhas, interpretar respostas de leads, sugerir próximas ações no CRM e gerar relatórios executivos. Como posso ajudar?' }
+    { role: 'assistant', text: 'Olá, Jaasiel! Sou a Sofia. Estou aqui para te ajudar a acompanhar as campanhas, entender o que está acontecendo com os leads e decidir os próximos passos no CRM. Me pergunta o que quiser!' }
   ])
   const [sofiaInput, setSofiaInput]     = useState('')
   const [sofiaLoading, setSofiaLoading] = useState(false)
@@ -175,10 +175,22 @@ export default function App() {
     const utt = new SpeechSynthesisUtterance(clean)
     utt.lang = 'pt-BR'
     utt.rate = 1.05
-    utt.pitch = 1.0
+    utt.pitch = 1.15
+
     const voices = window.speechSynthesis.getVoices()
-    const ptVoice = voices.find(v => v.lang.startsWith('pt'))
-    if (ptVoice) utt.voice = ptVoice
+    // Prioridade: voz feminina pt-BR conhecida
+    const femaleNames = ['Google português do Brasil', 'Luciana', 'Maria', 'Ana', 'Francisca']
+    let voice =
+      voices.find(v => femaleNames.some(n => v.name.includes(n))) ||
+      voices.find(v => v.lang === 'pt-BR') ||
+      voices.find(v => v.lang.startsWith('pt'))
+    if (voice) utt.voice = voice
+
+    // Chrome carrega vozes async — tenta de novo se lista vazia
+    if (!voices.length) {
+      window.speechSynthesis.onvoiceschanged = () => speakText(text)
+      return
+    }
     window.speechSynthesis.speak(utt)
   }
 
@@ -309,7 +321,7 @@ export default function App() {
         <div className="card kpi-card">
           <span className="kpi-label">Ações Pendentes</span>
           <strong className="kpi-value kpi-alert">{approvals.length}</strong>
-          <span className="kpi-sub">Aguardando aprovação humana</span>
+          <span className="kpi-sub">Esperando sua aprovação</span>
         </div>
         <div className="card kpi-card">
           <span className="kpi-label">Negócios Pipedrive</span>
@@ -606,7 +618,7 @@ export default function App() {
 
       {messages.length > 0 && (
         <div className="card section-block">
-          <h2>Mensagens em Análise</h2>
+          <h2>Mensagens</h2>
           <table>
             <thead>
               <tr><th>Mensagem</th><th>Canal</th><th>Campanha</th><th>Enviadas</th><th>Respostas</th></tr>
@@ -672,14 +684,14 @@ export default function App() {
     <>
       <div className="page-header">
         <h1>Ações do CRM</h1>
-        <p className="subtitle">Toda ação no CRM requer aprovação humana antes de ser executada</p>
+        <p className="subtitle">Você decide o que entra no CRM — revise cada item e aprove ou ignore</p>
       </div>
 
       {approvals.length === 0 && (
         <div className="card empty-state">
           <span className="empty-icon">✓</span>
-          <h3>Nenhuma ação pendente</h3>
-          <p>Todas as aprovações foram processadas.</p>
+          <h3>Tudo em dia!</h3>
+          <p>Não há nada esperando sua aprovação agora.</p>
         </div>
       )}
 
@@ -700,7 +712,7 @@ export default function App() {
 
             {lead.message && (
               <div className="lead-message">
-                <strong>Mensagem do Lead:</strong>
+                <strong>O que o lead disse:</strong>
                 <p>"{lead.message}"</p>
               </div>
             )}
@@ -734,7 +746,7 @@ export default function App() {
 
             {analysis.reply_ptbr && (
               <div className="suggested-reply">
-                <strong>Resposta Sugerida:</strong>
+                <strong>Sugestão de resposta:</strong>
                 <p>{analysis.reply_ptbr}</p>
               </div>
             )}
@@ -766,8 +778,8 @@ export default function App() {
   const renderSofia = () => (
     <>
       <div className="page-header">
-        <h1>Sofia — Assistente Comercial IA</h1>
-        <p className="subtitle">Análise de campanhas, sugestão de mensagens e orientação estratégica</p>
+        <h1>Sofia</h1>
+        <p className="subtitle">Pergunte sobre campanhas, leads ou próximos passos — pode falar também pelo microfone</p>
       </div>
 
       <div className="card chat-container">
@@ -834,10 +846,10 @@ export default function App() {
 
         <div className="chat-suggestions">
           {[
-            'Analise as campanhas Lemlist',
-            'Qual campanha está melhor?',
-            'Gere relatório executivo',
-            'Como melhorar a taxa de resposta?',
+            'Como estão as campanhas?',
+            'Qual campanha está indo melhor?',
+            'O que devo fazer agora?',
+            'Como melhorar os resultados?',
           ].map(s => (
             <button
               key={s}
@@ -894,7 +906,7 @@ export default function App() {
     <>
       <div className="page-header">
         <h1>Consulta de Dados</h1>
-        <p className="subtitle">Acesso direto aos dados brutos de Lemlist, Pipedrive, aprovações e mais</p>
+        <p className="subtitle">Veja os dados completos das suas ferramentas — Lemlist, Pipedrive e mais</p>
       </div>
 
       <div className="card consulta-tips">
