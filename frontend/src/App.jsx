@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
+const API = import.meta.env.VITE_API_URL || '/api'
+
 const STATUS_MAP = {
   // English (legacy)
   running: { label: 'Ativo',     cls: 'badge-running' },
@@ -61,7 +63,7 @@ export default function App() {
     try {
       setLoading(true)
       setError(null)
-      const res = await fetch('/api/dashboard/full')
+      const res = await fetch(`${API}/dashboard/full`)
       if (!res.ok) throw new Error('Erro HTTP ' + res.status)
       setData(await res.json())
     } catch (err) {
@@ -100,7 +102,7 @@ export default function App() {
     setSofiaMessages(prev => [...prev, { role: 'user', text }])
     setSofiaLoading(true)
     try {
-      const res = await fetch('/api/campaign-chat/message', {
+      const res = await fetch(`${API}/campaign-chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text }),
@@ -137,7 +139,7 @@ export default function App() {
       i === msgIndex ? { ...m, pendingAction: null, actionApproved: true } : m
     ))
     try {
-      const res = await fetch('/api/campaign-chat/message', {
+      const res = await fetch(`${API}/campaign-chat/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: 'execute', approve_action: pendingAction }),
@@ -208,7 +210,7 @@ export default function App() {
         form.append('file', blob, 'audio.webm')
         setSofiaLoading(true)
         try {
-          const res  = await fetch('/api/transcribe', { method: 'POST', body: form })
+          const res  = await fetch(`${API}/transcribe`, { method: 'POST', body: form })
           const json = await res.json()
           if (json.ok && json.text) {
             setSofiaInput(json.text)
@@ -264,7 +266,7 @@ export default function App() {
 
   const handleApproval = async (item, decision) => {
     try {
-      const res = await fetch('/api/approvals/decision', {
+      const res = await fetch(`${API}/approvals/decision`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ approval_id: item.approval_id || item.id, decision }),
@@ -280,7 +282,7 @@ export default function App() {
     const lead     = item.lead || {}
     const analysis = item.analysis || {}
     try {
-      const res = await fetch('/api/pipedrive/tasks/create', {
+      const res = await fetch(`${API}/pipedrive/tasks/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

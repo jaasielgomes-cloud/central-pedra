@@ -15,10 +15,24 @@ services:
         sync: false
       - key: LEMLIST_BASE_URL
         value: https://api.lemlist.com/api
+      - key: LEMLIST_SEND_USER_ID
+        sync: false
       - key: PIPEDRIVE_API_KEY
         sync: false
       - key: PIPEDRIVE_BASE_URL
         value: https://api.pipedrive.com
+      - key: EVOLUTION_API_URL
+        sync: false
+      - key: EVOLUTION_API_KEY
+        sync: false
+      - key: EVOLUTION_INSTANCE
+        value: pedra
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: OUTPUT_DOCUMENTS_DIR
+        value: /tmp/central-pedra/documentos
+      - key: FFMPEG_BIN
+        value: ffmpeg
       - key: OPENAI_API_KEY
         sync: false
       - key: GEMINI_API_KEY
