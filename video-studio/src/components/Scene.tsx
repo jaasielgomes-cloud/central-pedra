@@ -7,6 +7,7 @@ import {
   interpolate,
 } from "remotion";
 import { Background } from "./Background";
+import { Effects } from "./Effects";
 import { Hook } from "./Hook";
 import { CaptionLine } from "./CaptionLine";
 import { theme } from "../theme";
@@ -35,7 +36,10 @@ export const Scene: React.FC<{ scene: SceneData; bg: [string, string] }> = ({
 
   return (
     <AbsoluteFill style={{ clipPath: `inset(0 ${100 - reveal}% 0 0)` }}>
-      <Background from={bg[0]} to={bg[1]} />
+      <Background from={bg[0]} to={bg[1]} image={scene.image} video={scene.video} />
+
+      {/* EFEITOS cinematograficos: por cima do fundo, por baixo do texto */}
+      <Effects />
 
       {/* HOOK - primeiros 3.5s, centralizado */}
       {frame < HOOK_FRAMES && (
@@ -51,38 +55,33 @@ export const Scene: React.FC<{ scene: SceneData; bg: [string, string] }> = ({
         </AbsoluteFill>
       )}
 
-      {/* LEGENDAS da narracao - zona segura (10%-85%), centro-baixo */}
-      <AbsoluteFill
-        style={{
-          justifyContent: "flex-end",
-          alignItems: "center",
-          paddingBottom: `${(1 - theme.safe.bottom) * 100 + 6}%`,
-        }}
-      >
-        {scene.lines.map((line, i) => {
-          const startFrame = Math.round(line.startSec * fps);
-          const next = scene.lines[i + 1];
-          const endFrame = next
-            ? Math.round(next.startSec * fps)
-            : durationInFrames;
-          return (
-            <Sequence
-              key={i}
-              from={startFrame}
-              durationInFrames={endFrame - startFrame}
-              layout="none"
+      {/* LEGENDAS da narracao - zona segura 9:16 (fora dos ~15% inferiores) */}
+      {scene.lines.map((line, i) => {
+        const startFrame = Math.round(line.startSec * fps);
+        const next = scene.lines[i + 1];
+        const endFrame = next
+          ? Math.round(next.startSec * fps)
+          : durationInFrames;
+        return (
+          <Sequence
+            key={i}
+            from={startFrame}
+            durationInFrames={endFrame - startFrame}
+            layout="none"
+          >
+            <AbsoluteFill
+              style={{
+                justifyContent: "flex-end",
+                alignItems: "center",
+                // mantem o texto acima da UI do Instagram/TikTok (zona segura)
+                paddingBottom: `${(1 - theme.safe.bottom) * 100 + 4}%`,
+              }}
             >
-              <AbsoluteFill
-                style={{ justifyContent: "flex-end", alignItems: "center" }}
-              >
-                <div style={{ paddingBottom: 0 }}>
-                  <CaptionLine words={line.words} startFrame={0} />
-                </div>
-              </AbsoluteFill>
-            </Sequence>
-          );
-        })}
-      </AbsoluteFill>
+              <CaptionLine words={line.words} startFrame={0} />
+            </AbsoluteFill>
+          </Sequence>
+        );
+      })}
     </AbsoluteFill>
   );
 };

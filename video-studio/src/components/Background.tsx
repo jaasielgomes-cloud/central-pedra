@@ -1,10 +1,23 @@
 import React from "react";
-import { useCurrentFrame, useVideoConfig, interpolate, AbsoluteFill } from "remotion";
+import {
+  useCurrentFrame,
+  useVideoConfig,
+  interpolate,
+  AbsoluteFill,
+  Img,
+  OffthreadVideo,
+  staticFile,
+} from "remotion";
 
-// Fundo cinematografico gerado por codigo (sem imagem externa):
-// gradiente escuro + zoom lento (Ken Burns) + vinheta. Da sensacao de movimento
-// mesmo sem b-roll. Em producao, troque por <Img>/<Video> com o mesmo zoom.
-export const Background: React.FC<{ from: string; to: string }> = ({ from, to }) => {
+// Fundo cinematografico com zoom lento (Ken Burns).
+// Prioridade de b-roll: video > imagem > gradiente gerado por codigo.
+// `video`/`image` = nome do arquivo em public/ (ex: "cena1.mp4" / "cena1.jpg").
+export const Background: React.FC<{
+  from: string;
+  to: string;
+  image?: string;
+  video?: string;
+}> = ({ from, to, image, video }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
@@ -13,12 +26,33 @@ export const Background: React.FC<{ from: string; to: string }> = ({ from, to })
 
   return (
     <AbsoluteFill style={{ backgroundColor: to, overflow: "hidden" }}>
-      <AbsoluteFill
-        style={{
-          transform: `scale(${scale}) translateY(${shift}px)`,
-          background: `radial-gradient(120% 80% at 50% 35%, ${from} 0%, ${to} 70%)`,
-        }}
-      />
+      {video ? (
+        <AbsoluteFill
+          style={{ transform: `scale(${scale}) translateY(${shift}px)` }}
+        >
+          <OffthreadVideo
+            src={staticFile(video)}
+            muted
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </AbsoluteFill>
+      ) : image ? (
+        <AbsoluteFill
+          style={{ transform: `scale(${scale}) translateY(${shift}px)` }}
+        >
+          <Img
+            src={staticFile(image)}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </AbsoluteFill>
+      ) : (
+        <AbsoluteFill
+          style={{
+            transform: `scale(${scale}) translateY(${shift}px)`,
+            background: `radial-gradient(120% 80% at 50% 35%, ${from} 0%, ${to} 70%)`,
+          }}
+        />
+      )}
       {/* vinheta cinematografica */}
       <AbsoluteFill
         style={{

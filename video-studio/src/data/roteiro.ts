@@ -16,6 +16,8 @@ export type Scene = {
   id: string;
   hook: string; // frase-gancho grande no inicio do bloco (<= 6 palavras)
   hookHighlight?: number; // indice da palavra do hook em destaque
+  image?: string; // b-roll estatico: arquivo em public/ (ex: "cena1.jpg")
+  video?: string; // b-roll em video: arquivo em public/ (ex: "cena1.mp4"). Tem prioridade sobre image.
   lines: CaptionLine[]; // legendas da narracao (startSec relativo AO BLOCO)
 };
 

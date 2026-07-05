@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Series, useVideoConfig } from "remotion";
+import { AbsoluteFill, Audio, Series, staticFile, useVideoConfig } from "remotion";
 import { scenes, SCENE_SECONDS } from "./data/roteiro";
 import { theme } from "./theme";
 import { Scene } from "./components/Scene";
@@ -13,6 +13,10 @@ export const HistoriaComGanchos: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
+      {/* TRILHA sonora cinematografica (regenerar com assets-gen/gen_trilha.py).
+          volume baixo para nao competir com a narracao quando ela existir. */}
+      <Audio src={staticFile("trilha.wav")} volume={0.5} />
+
       <Series>
         {scenes.map((scene, i) => (
           <Series.Sequence key={scene.id} durationInFrames={sceneFrames}>
