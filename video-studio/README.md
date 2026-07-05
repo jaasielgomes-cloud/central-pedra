@@ -12,6 +12,9 @@ gancho a cada 30 segundos**.
 cd video-studio
 npm install
 
+# gerar a trilha sonora (regeneravel; nao vem versionada)
+python3 assets-gen/gen_trilha.py     # cria public/trilha.wav
+
 # abrir o editor visual (preview ao vivo, mexer no roteiro e ver na hora)
 npm run dev            # remotion studio -> http://localhost:3000
 

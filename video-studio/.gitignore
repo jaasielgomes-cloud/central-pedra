@@ -2,3 +2,7 @@ node_modules/
 out/
 .remotion/
 *.log
+
+# Midia gerada / regeneravel - nao versionar (bloat de binario).
+# A trilha e recriada com: python3 assets-gen/gen_trilha.py
+public/trilha.wav
