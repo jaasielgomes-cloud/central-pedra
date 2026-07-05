@@ -8,16 +8,18 @@ import {
   OffthreadVideo,
   staticFile,
 } from "remotion";
+import { SceneArt, ArtKind } from "./SceneArt";
 
 // Fundo cinematografico com zoom lento (Ken Burns).
-// Prioridade de b-roll: video > imagem > gradiente gerado por codigo.
+// Prioridade de b-roll: video > imagem > arte procedural > gradiente.
 // `video`/`image` = nome do arquivo em public/ (ex: "cena1.mp4" / "cena1.jpg").
 export const Background: React.FC<{
   from: string;
   to: string;
   image?: string;
   video?: string;
-}> = ({ from, to, image, video }) => {
+  art?: ArtKind;
+}> = ({ from, to, image, video, art }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
 
@@ -44,6 +46,10 @@ export const Background: React.FC<{
             src={staticFile(image)}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
+        </AbsoluteFill>
+      ) : art ? (
+        <AbsoluteFill style={{ transform: `scale(${scale}) translateY(${shift}px)` }}>
+          <SceneArt kind={art} />
         </AbsoluteFill>
       ) : (
         <AbsoluteFill

@@ -18,6 +18,7 @@ export type Scene = {
   hookHighlight?: number; // indice da palavra do hook em destaque
   image?: string; // b-roll estatico: arquivo em public/ (ex: "cena1.jpg")
   video?: string; // b-roll em video: arquivo em public/ (ex: "cena1.mp4"). Tem prioridade sobre image.
+  art?: "stars" | "desert" | "mountain" | "dawn"; // cenario procedural (sem asset externo)
   lines: CaptionLine[]; // legendas da narracao (startSec relativo AO BLOCO)
 };
 
@@ -31,6 +32,7 @@ export const scenes: Scene[] = [
     id: "bloco-1",
     hook: "Deus pediu o IMPOSSÍVEL",
     hookHighlight: 3,
+    art: "stars",
     lines: [
       { startSec: 4, words: [w("Ele era"), w("só"), w("um homem")] },
       { startSec: 7, words: [w("comum,"), w("sem"), w("nada de"), w("especial.")] },
@@ -44,6 +46,7 @@ export const scenes: Scene[] = [
     id: "bloco-2",
     hook: "A promessa parecia MORTA",
     hookHighlight: 3,
+    art: "desert",
     lines: [
       { startSec: 4, words: [w("Os anos"), w("passaram.")] },
       { startSec: 7, words: [w("Nada", true), w("aconteceu.")] },
@@ -57,6 +60,7 @@ export const scenes: Scene[] = [
     id: "bloco-3",
     hook: "No terceiro dia, tudo MUDOU",
     hookHighlight: 4,
+    art: "mountain",
     lines: [
       { startSec: 4, words: [w("O impossível"), w("virou"), w("real", true)] },
       { startSec: 8, words: [w("Isaque"), w("nasceu.")] },
@@ -70,6 +74,7 @@ export const scenes: Scene[] = [
     id: "bloco-4",
     hook: "A fé dele te ENSINA isso",
     hookHighlight: 4,
+    art: "dawn",
     lines: [
       { startSec: 4, words: [w("Promessa"), w("adiada"), w("não é")] },
       { startSec: 8, words: [w("promessa"), w("negada.", true)] },

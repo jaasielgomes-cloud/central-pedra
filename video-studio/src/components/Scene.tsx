@@ -36,7 +36,7 @@ export const Scene: React.FC<{ scene: SceneData; bg: [string, string] }> = ({
 
   return (
     <AbsoluteFill style={{ clipPath: `inset(0 ${100 - reveal}% 0 0)` }}>
-      <Background from={bg[0]} to={bg[1]} image={scene.image} video={scene.video} />
+      <Background from={bg[0]} to={bg[1]} image={scene.image} video={scene.video} art={scene.art} />
 
       {/* EFEITOS cinematograficos: por cima do fundo, por baixo do texto */}
       <Effects />
