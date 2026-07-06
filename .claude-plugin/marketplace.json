@@ -1,0 +1,21 @@
+{
+  "name": "central-pedra",
+  "owner": {
+    "name": "Grupo Pedra",
+    "url": "https://github.com/jaasielgomes-cloud/central-pedra"
+  },
+  "metadata": {
+    "description": "Skills de marketing + compreensão de vídeo para todo o ecossistema Claude (Claude Code, Codex, Cursor, Gemini CLI...).",
+    "version": "1.0.0",
+    "repository": "https://github.com/jaasielgomes-cloud/central-pedra"
+  },
+  "plugins": [
+    {
+      "name": "central-pedra-skills",
+      "description": "46 skills de marketing (CRO, copywriting, SEO, AI SEO, cold email, prospecting, ads, ad creative, SMS, social, pricing, offers, referrals, revops, sales enablement, customer research, launch, churn prevention, marketing plan e mais) + 3 skills de vídeo (watch: assiste vídeos por URL/arquivo com download + frames + transcrição; video-frames: extração leve de frames; analyzing-video: análise com grades de montagem, detecção de cenas e subagentes).",
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/jaasielgomes-cloud/central-pedra"
+    }
+  ]
+}

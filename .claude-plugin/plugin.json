@@ -1,0 +1,31 @@
+{
+  "name": "central-pedra-skills",
+  "displayName": "Central Pedra Skills",
+  "description": "49 skills para agentes de IA: 46 skills de marketing (CRO, copywriting, SEO, cold email, ads, pricing, growth, sales enablement...) e 3 skills de compreensão de vídeo que dão ao Claude a capacidade de 'assistir' vídeos — extrair frames, transcrever áudio e analisar o conteúdo, a partir de arquivos locais ou URLs.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Grupo Pedra"
+  },
+  "homepage": "https://github.com/jaasielgomes-cloud/central-pedra",
+  "repository": "https://github.com/jaasielgomes-cloud/central-pedra",
+  "license": "MIT",
+  "keywords": [
+    "marketing",
+    "seo",
+    "copywriting",
+    "cold-email",
+    "ads",
+    "cro",
+    "pricing",
+    "growth",
+    "video",
+    "watch",
+    "youtube",
+    "transcription",
+    "whisper",
+    "ffmpeg",
+    "frames",
+    "multimodal"
+  ],
+  "skills": "./.claude/skills"
+}
