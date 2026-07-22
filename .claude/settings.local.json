@@ -17,7 +17,9 @@
       "Bash(git commit *)",
       "Bash(gh repo *)",
       "Bash(git push *)",
-      "Bash(Remove-Item -Recurse -Force .git)"
+      "Bash(Remove-Item -Recurse -Force .git)",
+      "mcp__18cdf583-5b44-406c-bbb0-b5fd3f58639c__upload",
+      "mcp__18cdf583-5b44-406c-bbb0-b5fd3f58639c__generate_media"
     ]
   }
 }
