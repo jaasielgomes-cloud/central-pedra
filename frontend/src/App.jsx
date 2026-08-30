@@ -36,6 +36,7 @@ const NAV = [
   { id: 'relatorios',label: 'Relatórios',       icon: '▦' },
   { id: 'acoes',     label: 'Para Aprovar',      icon: '⚡' },
   { id: 'sofia',     label: 'Sofia',             icon: '◇' },
+  { id: 'imagem',    label: 'Prompt de Imagem',  icon: '◆' },
   { id: 'consulta',  label: 'Dados',             icon: '⌕' },
 ]
 
@@ -59,6 +60,13 @@ export default function App() {
   const [consultaInput, setConsultaInput] = useState('')
   const [consultaResult, setConsultaResult] = useState(null)
 
+  const [imagePromptMessages, setImagePromptMessages] = useState([
+    { role: 'assistant', text: 'Olá! Descreva a imagem que você imagina — pode ser em poucas palavras — que eu transformo em um prompt técnico, em inglês, pronto para usar em Midjourney, DALL-E 3 ou FLUX.1.' }
+  ])
+  const [imagePromptInput, setImagePromptInput]     = useState('')
+  const [imagePromptLoading, setImagePromptLoading] = useState(false)
+  const imagePromptEndRef = useRef(null)
+
   const fetchDashboard = async () => {
     try {
       setLoading(true)
@@ -75,6 +83,7 @@ export default function App() {
 
   useEffect(() => { fetchDashboard() }, [])
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [sofiaMessages])
+  useEffect(() => { imagePromptEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [imagePromptMessages])
 
   const campaigns    = data?.campaigns?.campaigns || []
   const approvals    = data?.approvals?.items     || []
@@ -168,6 +177,45 @@ export default function App() {
       role: 'assistant',
       text: 'Tudo bem, ação cancelada. Como posso ajudar de outra forma?',
     }])
+  }
+
+  const sendImagePrompt = async () => {
+    const text = imagePromptInput.trim()
+    if (!text || imagePromptLoading) return
+    setImagePromptInput('')
+    setImagePromptMessages(prev => [...prev, { role: 'user', text }])
+    setImagePromptLoading(true)
+    try {
+      const res = await fetch(`${API}/image-prompt/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text }),
+      })
+      if (!res.ok) throw new Error('HTTP ' + res.status)
+      const json = await res.json()
+      const reply = json.reply || 'Não consegui gerar o prompt agora. Tente novamente.'
+      setImagePromptMessages(prev => [...prev, { role: 'assistant', text: reply }])
+    } catch {
+      setImagePromptMessages(prev => [...prev, {
+        role: 'assistant',
+        text: 'Backend indisponível no momento. Verifique se o servidor está rodando em :8080.'
+      }])
+    } finally {
+      setImagePromptLoading(false)
+    }
+  }
+
+  const extractImagePrompt = (text) => {
+    const match = text.match(/\[IMAGE_PROMPT\]([\s\S]*?)\[\/IMAGE_PROMPT\]/)
+    return match ? match[1].trim() : null
+  }
+
+  const copyImagePrompt = async (prompt) => {
+    try {
+      await navigator.clipboard.writeText(prompt)
+    } catch {
+      // clipboard indisponível — usuário pode selecionar manualmente
+    }
   }
 
   const speakText = (text) => {
@@ -904,6 +952,86 @@ export default function App() {
     </>
   )
 
+  const renderImagePrompt = () => (
+    <>
+      <div className="page-header">
+        <h1>Prompt de Imagem</h1>
+        <p className="subtitle">Descreva a cena em português — a IA devolve um prompt técnico em inglês, pronto para Midjourney, DALL-E 3 ou FLUX.1</p>
+      </div>
+
+      <div className="card chat-container">
+        <div className="chat-messages">
+          {imagePromptMessages.map((msg, i) => {
+            const extracted = msg.role === 'assistant' ? extractImagePrompt(msg.text) : null
+            return (
+              <div key={i} className={`chat-bubble chat-${msg.role}`}>
+                {msg.role === 'assistant' && (
+                  <span className="chat-avatar">◆</span>
+                )}
+                <div className="chat-text-wrap">
+                  {extracted ? (
+                    <div className="prompt-result">
+                      <pre className="prompt-result-text">{extracted}</pre>
+                      <button className="btn-copy-prompt" onClick={() => copyImagePrompt(extracted)}>
+                        ⧉ Copiar prompt
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="chat-text">{msg.text}</div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+          {imagePromptLoading && (
+            <div className="chat-bubble chat-assistant">
+              <span className="chat-avatar">◆</span>
+              <div className="chat-text chat-loading">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          )}
+          <div ref={imagePromptEndRef} />
+        </div>
+
+        <div className="chat-suggestions">
+          {[
+            'Um engenheiro analisando a planta de uma obra ao entardecer',
+            'Caminhão da concessionária saindo de um bay de serviço moderno',
+            'Logo minimalista para a Pedra Tech, estilo tech industrial',
+            'Fachada futurista de uma concessionária de caminhões',
+          ].map(s => (
+            <button
+              key={s}
+              className="suggestion-chip"
+              onClick={() => { setImagePromptInput(s); }}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+
+        <div className="chat-input-row">
+          <input
+            value={imagePromptInput}
+            onChange={e => setImagePromptInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && sendImagePrompt()}
+            placeholder="Descreva a imagem que você imagina..."
+            disabled={imagePromptLoading}
+          />
+
+          <button
+            className="btn-send"
+            onClick={sendImagePrompt}
+            disabled={imagePromptLoading || !imagePromptInput.trim()}
+          >
+            Gerar prompt
+          </button>
+        </div>
+      </div>
+    </>
+  )
+
   const renderConsulta = () => (
     <>
       <div className="page-header">
@@ -980,6 +1108,7 @@ export default function App() {
       case 'relatorios':return renderRelatorios()
       case 'acoes':     return renderAcoes()
       case 'sofia':     return renderSofia()
+      case 'imagem':    return renderImagePrompt()
       case 'consulta':  return renderConsulta()
       default:          return renderDashboard()
     }

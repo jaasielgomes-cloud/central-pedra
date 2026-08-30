@@ -817,6 +817,38 @@ tr:hover td { background: #FAFAFA; }
   50%       { box-shadow: 0 0 0 6px rgba(225,38,28,0); }
 }
 
+/* ── Prompt de Imagem ─────────────────────────────────────────────── */
+.prompt-result {
+  background: var(--black);
+  border-radius: 10px;
+  padding: 14px;
+  max-width: 520px;
+}
+
+.prompt-result-text {
+  color: #fff;
+  font-size: 12.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  margin: 0 0 10px;
+}
+
+.btn-copy-prompt {
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-copy-prompt:hover { background: var(--red-dark); }
+
 .btn-audio-toggle {
   background: var(--gray-bg);
   border: 1.5px solid var(--gray-border);
