@@ -185,15 +185,30 @@
  ],
  "inserts": [
   {
-   "s": 5.2,
-   "e": 7.0,
+   "s": 3.9,
+   "e": 6.0,
+   "mode": "manchete",
+   "fonte": "Relatório de obra · Grupo Pedra",
+   "texto": "Estrutura em madeira engenheirada preservou 100% da vegetação do terreno",
+   "destaque": "preservou 100% da vegetação"
+  },
+  {
+   "s": 6.8,
+   "e": 8.1,
+   "mode": "numero",
+   "valor": 90,
+   "rotulo": "dias do início ao fim"
+  },
+  {
+   "s": 8.3,
+   "e": 10.4,
    "src": "media/aframe.mp4",
    "from": 30,
    "mode": "pip"
   },
   {
-   "s": 9.8,
-   "e": 11.6,
+   "s": 11.0,
+   "e": 14.0,
    "src": "media/aframe.mp4",
    "from": 40,
    "mode": "full"
@@ -201,5 +216,6 @@
  ],
  "cta": {
   "text": "Siga @grupopedra para ver mais obras"
- }
+ },
+ "drop": 14.8
 }

@@ -37,7 +37,10 @@ export const ReelRetencao: React.FC<{ data: ReelData }> = ({ data }) => {
       <Sequence durationInFrames={content}>
         <PunchZoomVideo src={main} plan={plan} keyHits={hits} muted={!data.video} />
         <Inserts items={data.inserts} />
-        <GradeOverlay vignette={0.35} />
+        {data.look === "estudio" && (
+          <AbsoluteFill style={{ background: "radial-gradient(70% 55% at 50% 38%, transparent 30%, rgba(0,0,0,0.78) 100%)" }} />
+        )}
+        <GradeOverlay vignette={data.look === "estudio" ? 0.55 : 0.35} />
         <FilmGrain opacity={0.05} />
 
         <Sequence durationInFrames={f(HOOK_SECONDS)}>
@@ -54,7 +57,12 @@ export const ReelRetencao: React.FC<{ data: ReelData }> = ({ data }) => {
 
         {/* ÁUDIO: voz → música baixa → SFX sincronizados */}
         {data.audio && <Audio src={staticFile(data.audio)} />}
-        {data.music && <Audio src={staticFile(data.music)} volume={data.musicVolume ?? 0.12} />}
+        {data.music && <Audio src={staticFile(data.music)} volume={(fr) => musicVol(fr / fps, data)} />}
+        {data.drop !== undefined && (
+          <Sequence from={f(data.drop)} durationInFrames={f(1.5)}>
+            <Audio src={sfx("boom")} volume={0.8} />
+          </Sequence>
+        )}
         <Audio src={sfx("boom")} volume={0.7} />
         {plan.slice(1).map((p, i) => (
           <Sequence key={`z${i}`} from={f(p.s)} durationInFrames={10}>
@@ -83,6 +91,13 @@ export const ReelRetencao: React.FC<{ data: ReelData }> = ({ data }) => {
       </Sequence>
     </AbsoluteFill>
   );
+};
+
+// Trilha cresce ao longo do vídeo (tensão) e some antes do clímax ("drop").
+const musicVol = (t: number, d: ReelData) => {
+  const base = (d.musicVolume ?? 0.12) * (0.8 + 0.5 * Math.min(1, t / d.duration));
+  if (d.drop !== undefined && t > d.drop - 0.6 && t < d.drop) return 0;
+  return base;
 };
 
 export const calcReelMetadata: CalculateMetadataFunction<{ data: ReelData }> = ({ props }) => ({

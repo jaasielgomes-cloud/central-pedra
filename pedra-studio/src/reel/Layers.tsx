@@ -13,6 +13,7 @@ import { COLORS, RADIUS } from "../theme/tokens";
 import { SPRING } from "../theme/motion";
 import { stepAt, clean, type ZoomStep } from "./plan";
 import type { Insert, Word } from "./types";
+import { Manchete, Numero, Titulo } from "./Graphics";
 
 const isImage = (src: string) => /\.(png|jpe?g|webp)$/i.test(src);
 
@@ -40,7 +41,7 @@ export const PunchZoomVideo: React.FC<{
   return (
     <AbsoluteFill style={{ overflow: "hidden", background: COLORS.ink }}>
       <AbsoluteFill
-        style={{ transform: `scale(${step.scale * drift}) translate(${shake / 4}px, ${step.shiftY}%) rotate(${shake / 20}deg)` }}
+        style={{ transform: `scale(${step.scale * drift}) translate(calc(${step.shiftX}% + ${shake / 4}px), ${step.shiftY}%) rotate(${shake / 20}deg)` }}
       >
         <Media src={src} muted={muted} />
       </AbsoluteFill>
@@ -53,10 +54,14 @@ export const InsertLayer: React.FC<{ item: Insert }> = ({ item }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const p = spring({ frame, fps, config: SPRING.settle });
+  if (item.mode === "manchete") return <Manchete {...item} />;
+  if (item.mode === "numero") return <Numero {...item} />;
+  if (item.mode === "titulo") return <Titulo {...item} />;
   if (item.mode === "full") {
     const scale = interpolate(p, [0, 1], [1.25, 1.05]) + (frame / fps) * 0.02;
+    const blur = interpolate(frame, [0, 6], [18, 0], { extrapolateRight: "clamp" }); // whip de entrada
     return (
-      <AbsoluteFill style={{ transform: `scale(${scale})`, overflow: "hidden" }}>
+      <AbsoluteFill style={{ transform: `scale(${scale})`, filter: `blur(${blur}px)`, overflow: "hidden" }}>
         <Media src={item.src} from={item.from} />
       </AbsoluteFill>
     );

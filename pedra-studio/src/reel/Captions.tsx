@@ -51,7 +51,8 @@ export const Captions: React.FC<{ chunks: Chunk[]; keywords: string[] }> = ({ ch
               WebkitTextStroke: "3px #000",
               paintOrder: "stroke fill",
               textShadow: "0 8px 30px rgba(0,0,0,0.7)",
-              transform: isKey && spoken ? "scale(1.12) rotate(-2deg)" : undefined,
+              // salto + inclinação (sem escala: não invade a palavra vizinha)
+              transform: isKey && spoken ? "translateY(-8px) rotate(-3deg)" : undefined,
               display: "inline-block",
             }}
           >

@@ -44,9 +44,15 @@ Preview interativo: `npm run dev`.
 - **Punch zoom** a cada frase (esconde os cortes e reseta a atenção) + deriva lenta
 - **Legenda** estilo karaokê: bloco curto, palavra falada em amarelo, palavras-chave em vermelho
 - **Tremida + impacto sonoro** nas palavras-chave
-- **B-roll** tela cheia ou janela (PIP), com whoosh
+- **B-roll** tela cheia (entrada com desfoque rápido) ou janela (PIP), com whoosh
+- **Manchete** com marca-texto animado, **número** que conta na tela, **cartela de capítulo**
+- **Look estúdio** (fundo escuro, luz dramática) + **2ª câmera simulada** no punch zoom
+- **Trilha** que cresce e some antes do clímax (**drop**) com impacto
 - **Barra de progresso**, color grade de cinema, grão de filme, marca d'água
 - **Riser + cartão final** com logo e CTA
+
+Referências de nível: Nikolas Ferreira (monólogo), Daniel Penin (documentário rápido),
+Abraham (cinema narrativo) — ver skill `/reels`.
 
 ## Estrutura
 ```

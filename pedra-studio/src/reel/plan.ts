@@ -30,19 +30,25 @@ export const buildChunks = (words: Word[]): Chunk[] => {
 
 // "Punch zoom" estilo Nicolas: a cada frase nova o enquadramento salta
 // (esconde o jump cut e reseta a atenção). Alterna níveis sem repetir.
-const LEVELS = [1.0, 1.14, 1.06, 1.2];
+// Níveis alternam escala e enquadramento lateral: simula 2ª câmera (plano aberto ↔ close).
+const LEVELS = [
+  { scale: 1.0, x: 0, y: 0 },
+  { scale: 1.18, x: 3, y: -3 },
+  { scale: 1.07, x: -2, y: 0 },
+  { scale: 1.26, x: -3, y: -4 },
+];
 
-export type ZoomStep = { s: number; scale: number; shiftY: number };
+export type ZoomStep = { s: number; scale: number; shiftX: number; shiftY: number };
 
 export const buildZoomPlan = (chunks: Chunk[]): ZoomStep[] => {
-  const steps: ZoomStep[] = [{ s: 0, scale: LEVELS[0], shiftY: 0 }];
+  const steps: ZoomStep[] = [{ s: 0, scale: 1, shiftX: 0, shiftY: 0 }];
   let i = 0;
   chunks.forEach((c, idx) => {
     const prev = chunks[idx - 1];
     const sentenceStart = !prev || PUNCT.test(prev.words[prev.words.length - 1].t) || c.s - prev.e > PAUSE;
     if (idx > 0 && sentenceStart) {
       i = (i + 1) % LEVELS.length;
-      steps.push({ s: c.s, scale: LEVELS[i], shiftY: LEVELS[i] > 1.1 ? -3 : 0 });
+      steps.push({ s: c.s, scale: LEVELS[i].scale, shiftX: LEVELS[i].x, shiftY: LEVELS[i].y });
     }
   });
   return steps;
