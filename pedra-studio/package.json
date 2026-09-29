@@ -1,7 +1,7 @@
 {
-  "name": "pedra-video-aframe",
+  "name": "pedra-studio",
   "version": "1.0.0",
-  "description": "Case de Obra — Casa em A (Grupo Pedra) · gerado com PEDRA MOTION OS",
+  "description": "Estúdio de vídeo do Grupo Pedra (Remotion) · PEDRA MOTION OS",
   "scripts": {
     "dev": "remotion studio",
     "render": "remotion render AFrameCase out/aframe-9x16.mp4 --codec=h264 --crf=17",

@@ -1,0 +1,4 @@
+# Tudo local, gratuito e sem limite de uso.
+auto-editor>=26        # corta silêncios (jump cuts)
+faster-whisper>=1.1    # legenda palavra-a-palavra (MIT)
+chatterbox-tts>=0.1.4  # narração natural PT-BR + clonagem de voz (MIT)

@@ -1,0 +1,8 @@
+node_modules/
+out/
+.remotion/
+# gerados pelo pipeline (vídeos pesados não vão pro git)
+public/projetos/
+projetos/
+vozes/*.wav
+.venv/
