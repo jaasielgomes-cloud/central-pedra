@@ -1,0 +1,5 @@
+{"descricao": "Discreto: minúsculas, branco, sem destaque de palavra. Estilo lifestyle/premium",
+ "font": "Poppins ExtraBold", "size": 68, "uppercase": false, "words_per_chunk": 5, "max_chars": 28,
+ "color": "#FFFFFF", "highlight": "#FFFFFF", "emphasis": "#FFFFFF", "persist_emphasis": false,
+ "outline": 0, "shadow": 3, "shadow_alpha": "70",
+ "position": "bottom", "margin_v": 480, "animation": "fade", "crop_y": 0.35}

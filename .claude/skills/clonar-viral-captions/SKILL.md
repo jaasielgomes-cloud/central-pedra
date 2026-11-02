@@ -9,7 +9,7 @@ Copia a **estrutura** que viralizou (ritmo, gancho, cortes, legenda, enquadramen
 
 ## Limite técnico
 
-Não existe conector do Captions. Os templates são aplicados **no app**. Claude faz a engenharia reversa e entrega tudo pronto para gravar e aplicar o template, ou monta o vídeo com Higgsfield/ffmpeg.
+Não existe conector do Captions. Claude faz a engenharia reversa e recria o template como **preset do `captions-studio`**, renderizado localmente. Aplicar no app do Captions continua sendo uma opção manual.
 
 ## Passos
 
@@ -32,9 +32,10 @@ Variáveis trocáveis: tema, fala, cenário, CTA
 ```
 
 4. **Adaptar**: reescrever o roteiro com o tema do usuário mantendo tempos e função de cada bloco. Entregar 3 variações de gancho.
-5. **Produzir**: encaminhar para a skill `formato-*` correspondente. Se o usuário for aplicar o template no Captions, entregar: roteiro para gravar, lista de takes, textos de tela e o nome/estilo do template a escolher.
-6. **Checar** com `virality_predictor` (opcional, pago) e com o checklist do pipeline.
+5. **Recriar o estilo de legenda**: com os quadros extraídos, identificar fonte (a livre mais próxima), tamanho, cores, palavras por bloco, posição e animação. Salvar como `../captions-studio/presets/<nome>.json` (copiar um preset existente como base) e renderizar um teste de 5s para comparar com a referência lado a lado.
+6. **Produzir**: gravação conforme a skill `formato-*` correspondente → `captions-studio edit --preset <nome>`.
+7. **Checar** com `virality_predictor` (opcional, pago) e com o checklist do pipeline.
 
 ## Biblioteca de templates
 
-Cada blueprint salvo vira um template reutilizável. Quando o usuário disser "usa o template X", carregue `blueprints/X.md` e pule direto para o passo 4.
+Cada blueprint (`blueprints/X.md`) + preset (`presets/X.json`) vira um template reutilizável. Quando o usuário disser "usa o template X", carregue os dois e pule para o passo 4.

@@ -1,0 +1,5 @@
+{"descricao": "Centro da tela, CAIXA ALTA, palavra atual amarela. Usar com --title. Para cortes de podcast",
+ "font": "Poppins Black", "size": 100, "uppercase": true, "words_per_chunk": 3, "max_chars": 16,
+ "color": "#FFFFFF", "highlight": "#FFC400", "emphasis": "#FF5A36", "active_scale": 110,
+ "outline": 6, "outline_color": "#000000", "shadow": 4, "shadow_alpha": "40",
+ "position": "center", "margin_v": 0, "animation": "pop", "crop_y": 0.3}

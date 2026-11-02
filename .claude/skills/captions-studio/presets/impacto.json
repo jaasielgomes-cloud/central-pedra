@@ -1,0 +1,5 @@
+{"descricao": "2-3 palavras em CAIXA ALTA, palavra atual amarela, destaques verdes, pop. Estilo autoridade/negócios",
+ "font": "Poppins Black", "size": 112, "uppercase": true, "words_per_chunk": 3, "max_chars": 16,
+ "color": "#FFFFFF", "highlight": "#FFE500", "emphasis": "#3DFF6E", "active_scale": 108,
+ "outline": 7, "outline_color": "#000000", "shadow": 4, "shadow_alpha": "40",
+ "position": "bottom", "margin_v": 560, "animation": "pop", "crop_y": 0.35}

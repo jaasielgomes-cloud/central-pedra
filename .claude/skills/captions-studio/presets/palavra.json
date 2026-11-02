@@ -1,0 +1,5 @@
+{"descricao": "Uma palavra por vez, gigante, cores alternadas e bounce. Estilo entretenimento/react",
+ "font": "Anton", "size": 150, "uppercase": true, "words_per_chunk": 1, "max_chars": 14,
+ "color": "#FFFFFF", "emphasis": "#FF3B3B", "color_cycle": ["#FFFFFF", "#FFE500", "#FFFFFF", "#3DFF6E"],
+ "outline": 9, "outline_color": "#000000", "shadow": 6, "shadow_alpha": "30",
+ "position": "center", "margin_v": 0, "animation": "pop", "hold": 0.05, "crop_y": 0.35}

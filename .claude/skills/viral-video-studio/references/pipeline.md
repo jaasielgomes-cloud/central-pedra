@@ -40,7 +40,7 @@ Gravação pelo usuário: celular na vertical, luz de frente (janela), microfone
 
 - Palavra a palavra ou 2–4 palavras por vez, centro-baixo (fora da UI da plataforma: margem inferior ≥ 20%).
 - Destaque de cor nas palavras-chave.
-- Opções: app Captions (templates do usuário), workflow `video-montage` do Higgsfield, ou .ass via `compose.sh captions`.
+- Padrão: skill `captions-studio` (templates em `../../captions-studio/presets/`). Alternativas: app Captions ou workflow `video-montage` do Higgsfield.
 
 ## 6. Checklist antes de entregar
 

@@ -11,6 +11,7 @@ Núcleo compartilhado. As skills de formato seguem este pipeline e só definem o
 
 | Skill | Quando usar |
 |---|---|
+| `captions-studio` | Vídeo cru de fala → editado estilo Captions (cortes, zoom, legenda animada, B-roll, SFX, trilha). Usado na montagem de todos os formatos |
 | `clonar-viral-captions` | Já existe um vídeo viral (Captions, TikTok, Reels) e quer replicar a estrutura com outro conteúdo |
 | `avatar-foto-falante` | Só tem uma foto + texto/voz e quer a pessoa falando (estilo HeyGen) |
 | `formato-split-react` | Tela dividida: vídeo em cima, pessoa reagindo embaixo |
@@ -31,8 +32,8 @@ Detalhes em `references/pipeline.md`. Resumo:
 1. **Briefing** — tema, objetivo, público, CTA, marca, plataforma, duração (padrão 20–45s, 9:16).
 2. **Roteiro** — gancho nos 0–3s, uma ideia, virada, CTA. Entregue em tabela tempo × fala × visual × texto na tela.
 3. **Assets** — prefira gravação real do usuário (melhor retenção). IA só onde falta material. Ver `references/ferramentas.md`.
-4. **Montagem** — `scripts/compose.sh` (ffmpeg) ou workflow `video-montage` do Higgsfield.
-5. **Legenda** — app Captions ou workflow `video-montage` do Higgsfield.
+4. **Montagem estrutural** — `scripts/compose.sh` (tela dividida, PiP, stack, concat).
+5. **Edição + legenda** — skill `captions-studio` (padrão, local e grátis). Alternativas: app Captions ou workflow `video-montage` do Higgsfield (pago).
 6. **Checagem** — checklist de `references/pipeline.md` + `virality_predictor` (opcional, Higgsfield).
 
 ## Regras inegociáveis

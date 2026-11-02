@@ -1,0 +1,5 @@
+{"descricao": "Frase de 4-5 palavras aparecendo conforme é falada, palavra atual em ciano. Estilo educativo",
+ "font": "Poppins ExtraBold", "size": 86, "uppercase": false, "words_per_chunk": 5, "max_chars": 26,
+ "color": "#FFFFFF", "highlight": "#2EE6FF", "emphasis": "#FFE500", "active_scale": 100, "reveal": true,
+ "outline": 5, "outline_color": "#000000", "shadow": 3, "shadow_alpha": "50",
+ "position": "bottom", "margin_v": 520, "animation": "fade", "crop_y": 0.35}

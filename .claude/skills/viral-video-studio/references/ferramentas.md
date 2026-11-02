@@ -11,9 +11,10 @@ Todas as gerações do Higgsfield custam créditos. **Sempre** informar a estima
 | Variação de roupa/cenário da mesma pessoa | `generate_image` com a foto de referência | Para dois papéis, novelinha |
 | Analisar vídeo viral cena a cena | `video_analysis_create` → `video_analysis_status` | Upload do vídeo ou link do YouTube. Vídeos curtos dão melhor precisão |
 | Prever potencial viral | `virality_predictor` | Depois da montagem |
+| Edição estilo Captions (cortes, zoom, legenda animada, B-roll, SFX, trilha) | skill `captions-studio` | Local, sem créditos. Padrão para toda fala |
 | Montagem, trilha, legenda queimada | workflow `video-montage` (Higgsfield) ou `scripts/compose.sh` local | Local não gasta crédito |
 | Recriar um anúncio com outro elenco/produto | workflow `ad-multiplier` | Vídeo fonte de 4–30s |
-| Templates do app Captions | App Captions (manual) | Não há conector do Captions. O usuário aplica o template no app; Claude entrega roteiro, cortes e textos prontos |
+| Templates do app Captions | `captions-studio` + preset clonado | Não há conector do Captions; o visual é recriado como preset JSON e renderizado localmente |
 
 ## Clipes longos com Intone
 
